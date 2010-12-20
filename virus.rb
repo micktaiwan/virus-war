@@ -1,12 +1,5 @@
 require 'tentacle'
 
-Colors = {
-  :red      => 0xAA3333FF,
-  :green    => 0x33AA33FF,
-  :black    => 0x000000FF,
-  :neutral  => 0x999999FF
-  }
-
 class Virus
 
   attr_accessor :x, :y, :team, :start, :tentacles
@@ -126,6 +119,9 @@ class Virus
     @team = team
     @life = @start
     @ellipse.fill_color_rgba = Colors[team]
+    active_tentacles.each { |t|
+      t.change_team(team)
+      }
   end
 
 end

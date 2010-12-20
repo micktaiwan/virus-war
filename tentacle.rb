@@ -1,19 +1,21 @@
+#require 'player'
 require 'utils'
 
 class Tentacle
 
   attr_reader :from, :to, :state, :length
+  DEPLOYING = 'zipper.wav'
 
   def initialize(canvas, from, to)
     @canvas, @from, @to = canvas, from, to
     @line =     Gnome::CanvasLine.new(@canvas.root,
-      :fill_color => "#FF0000",
       :width_pixels => 4.0)
     @line.lower_to_bottom
     @line.raise(1)
     @state    = :created
     @length   = 0.0
     @distance = 0.0
+    #@player = Player.new
     deploy(to)
   end
 
@@ -62,11 +64,33 @@ class Tentacle
     @to       = to
     @distance = distance(@from.x, @from.y, to.x, to.y)
     @line.show
+    @line.fill_color_rgba = Colors[@from.team]
     @state    = :deploying
+    #@player.play(DEPLOYING)
   end
 
   def retract
     @state = :retracting
+  end
+
+  def change_team(team)
+    @line.fill_color_rgba = Colors[team]
+    retract
+  end
+
+  def cut(point)
+    return if @state == :retracting
+    if @state == :deploying or @state == :active
+      retract
+    end
+=begin
+    Gnome::CanvasEllipse.new(@canvas.root, {
+      :x1 => point.x-3,
+      :x2 => point.x+3,
+      :y1 => point.y-3,
+      :y2 => point.y+3,
+      :fill_color => "red"})
+=end
   end
 
 end
