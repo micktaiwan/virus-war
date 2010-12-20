@@ -33,6 +33,7 @@ class Virus
       :markup => @life.to_s})
     @ellipse.raise_to_top
     @lifetext.raise_to_top
+    @size_factor = 20
     update
   end
 
@@ -44,10 +45,10 @@ class Virus
 
   def update
     @life = @max if @life > @max
-    @ellipse.x1 = @x-20
-    @ellipse.x2 = @x+20
-    @ellipse.y1 = @y-20
-    @ellipse.y2 = @y+20
+    @ellipse.x1 = @x-@size_factor
+    @ellipse.x2 = @x+@size_factor
+    @ellipse.y1 = @y-@size_factor
+    @ellipse.y2 = @y+@size_factor
     if @team == :neutral
       @lifetext.markup = @contamination.round.to_s
     else
@@ -65,6 +66,10 @@ class Virus
       find_next_hidden.deploy(destination_virus)
     else
       @tentacles << Tentacle.new(@canvas, self, destination_virus)
+    end
+    # if same team and connected alredy
+    if destination_virus.team == @team and t = destination_virus.find_all(self)
+      t.retract
     end
   end
 
@@ -171,9 +176,9 @@ class Virus
     end
 
     # retract tentacle if not attacked and life is inferior
-    #active_tentacles.each { |t|
-    #  t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+1 < t.to.life
-    #  }
+    active_tentacles.each { |t|
+      t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+10 < t.to.life
+      }
 
     # attack nearest ennemy with less life
     if occupied_tentacles.size < @max_t
@@ -193,7 +198,7 @@ class Virus
   def nearest_ennemy_not_attacked
     rv = nil
     nd = 1000
-    @board.virus.select{|v| v.team != :neatral and v.team != @team}.each { |v|
+    @board.virus.select{|v| v.team != :neutral and v.team != @team}.each { |v|
       d = distance(self.x, self.y, v.x, v.y)
       rv = v and nd = d if d < nd
       }
@@ -202,6 +207,10 @@ class Virus
 
   def ennemies_tentacles
     @receiving_tentacles.select { |t| t.from.team != @team }
+  end
+
+  def update_size
+    @size_factor = 20 + @life/5
   end
 
 end

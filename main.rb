@@ -4,7 +4,7 @@ require 'board'
 class Viewer < Gtk::Window
   def initialize(board)
     super()
-    set_title("Tentacle Wars")
+    set_title("Virus Wars")
     signal_connect("delete_event") { |i,a| board.destroy }
     set_default_size(400,400)
     add(board)
