@@ -3,12 +3,19 @@ class Brain
   GrowFactor    = 0.5
   GiveFactor    = 0.25 # TODO: to multiply by the number of virus we give
 
-  def initialize(virus)
-    @virus = virus
+  def initialize(all_virus)
+    @virus = all_virus
     @time = Time.now
   end
 
   def iterate
+    update_life_points
+    play_ennemies
+  end
+
+private
+
+  def update_life_points
     time = Time.now - @time
     @virus.each{ |v|
       if v.team != :neutral
@@ -37,6 +44,13 @@ class Brain
 
   def factor(v)
     v.life/100+1
+  end
+
+  def play_ennemies
+    @virus.each { |v|
+      next if v.team == :neutral or v.team == :green
+      v.play
+      }
   end
 
 end

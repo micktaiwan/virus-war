@@ -7,11 +7,12 @@ require 'utils'
 class Board < Gtk::VBox
 
   attr_reader :virus
+  attr_accessor :fps
 
   def read_board
     @virus = []
     Board1[:virus].each { |v|
-      @virus << Virus.new(@canvas, v)
+      @virus << Virus.new(@canvas, v, self)
       }
   end
 
@@ -45,6 +46,12 @@ class Board < Gtk::VBox
     @box.add(@canvas)
     #@board_number = 1
     read_board()
+    @fps = Gnome::CanvasText.new(@canvas.root, {
+      :x => 20,
+      :y => 5,
+      :fill_color=>"white",
+      :family=>"Arial",
+      :markup => "FPS"})
     @line = Gnome::CanvasLine.new(@canvas.root,
       :width_pixels => 2.0)
     @line.hide
@@ -124,7 +131,9 @@ class Board < Gtk::VBox
 
   def cut(a,b,x,y)
     @virus.each { |v|
+      next if v.team != :green
       v.occupied_tentacles.each { |t|
+        next if t.state == :retracting
         p = get_intersection(t, a,b,x,y)
         next if not p
         t.cut(p)

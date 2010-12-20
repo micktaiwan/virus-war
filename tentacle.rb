@@ -23,23 +23,35 @@ class Tentacle
     #puts @state.to_s + ' ' + Time.now.to_s
     case @state
       when :deploying
+        if @to.find_all(@from)
+          dist = @distance/2
+        else
+          dist = @distance
+        end
         @length += 0.07
-        if @length >= @distance
-          @length = @distance
+        if @length >= dist
+          @length = dist
           @state  = :active
         end
         @from.remove_life(0.003)
         retract if @from.life <= 1
         update_line
       when :active
-        # nothing
+        if @to.find_all(@from)
+          @length = @distance/2
+          update_line
+        else
+          if @length < @distance
+            @state = :deploying
+          end
+        end
       when :retracting
-        @length -= 0.07
+        @length -= 0.14
         if @length <= 0
           @length  = 0
           hide
         end
-        @from.add_life(0.003)
+        @from.add_life(0.006)
         update_line
       when :hidden
       when :created
@@ -66,10 +78,13 @@ class Tentacle
     @line.show
     @line.fill_color_rgba = Colors[@from.team]
     @state    = :deploying
+    @to.receive_tentacle(self)
     #@player.play(DEPLOYING)
   end
 
   def retract
+    return if state == :retracting
+    @to.detach_ennemy_tentacle(self)
     @state = :retracting
   end
 

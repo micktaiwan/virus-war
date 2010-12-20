@@ -20,13 +20,13 @@ view.show
 brain = Brain.new(board.virus)
 
 loop {
-  #t =Time.now
+  t =Time.now
   brain.iterate
   #board.draw
   while (Gtk.events_pending?)
     Gtk.main_iteration
   end
   break if board.destroyed?
-  #puts (Time.now - t)*100
+  board.fps.markup = ((Time.now - t)*10000).to_i.to_s
   }
 
