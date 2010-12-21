@@ -15,5 +15,9 @@ class Wall
     @line.raise(1)
   end
 
+  def destroy
+    @line.destroy
+  end
+
 end
 

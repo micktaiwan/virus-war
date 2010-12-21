@@ -8,8 +8,10 @@ Colors = {
   :neutral  => 0x999999FF
   }
 
-GrowSpeed = 0.07
-LengthFactor = 1.0/20
+GrowSpeed = 120
+LengthFactor = 1.0/15
+
+GrowSpeedxLengthFactor = GrowSpeed*LengthFactor
 
 class Point
 
@@ -27,7 +29,7 @@ class Point
 end
 
 
-def distance(a,b,x,y)
+def utils_distance(a,b,x,y)
   Math.sqrt( (((x-a)**2) + ((y-b)**2)).abs )
 end
 

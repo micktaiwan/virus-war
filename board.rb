@@ -24,14 +24,13 @@ class Board < Gtk::VBox
   def clear_game
     @virus.each { |v|
       v.tentacles.each { |t|
-        t.line.destroy
+        t.destroy
         }
-      v.ellipse.destroy
-      v.lifetext.destroy
+      v.destroy
       }
     @virus.clear
     @walls.each { |w|
-      w.line.destroy
+      w.destroy
       }
     @walls.clear
   end
@@ -47,8 +46,8 @@ class Board < Gtk::VBox
     @rv   = nil
     @dist = 10000
     @virus.each { |v|
-      d = distance(v.x, v.y, x, y)
-      if d < 30 and d < @dist # and (team==:all or v.team == team)
+      d = utils_distance(v.x, v.y, x, y)
+      if d < 30 and d < @dist and (team==:all or v.team == team)
         @rv = v
         @dist = d
       end

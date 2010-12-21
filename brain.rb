@@ -41,7 +41,7 @@ private
       v.update_size
 
       # virus animation
-      v.update
+      v.update(time)
       }
     @time = Time.now
   end

@@ -1,17 +1,16 @@
 #require 'player'
 require 'utils'
+require 'sucker'
 
 class Tentacle
 
-  attr_reader :from, :to, :state, :length, :line
-  DEPLOYING = 'zipper.wav'
+  attr_reader :from, :to, :state, :length, :distance
+  # DEPLOYING = 'zipper.wav'
 
   def initialize(canvas, from, to)
     @canvas, @from, @to = canvas, from, to
-    @line =     Gnome::CanvasLine.new(@canvas.root,
-      :width_pixels => 4.0)
-    @line.lower_to_bottom
-    @line.raise(1)
+    @suckers = [] # a pool of suckers
+    @sucker_nb = 0
     @state    = :created
     @length   = 0.0
     @distance = 0.0
@@ -19,27 +18,30 @@ class Tentacle
     deploy(to)
   end
 
-  def update
+  def update(time)
+    @time = time
+    this_length = @time * GrowSpeed
     #puts @state.to_s + ' ' + Time.now.to_s
     case @state
       when :deploying
         animate_deploy
+        update_suckers
       when :active
         if @to.find_all(@from)
           deploy_to_dist(@distance/2)
         else
           @state = :deploying if @length < @distance
         end
+        update_suckers
       when :retracting
-        @length -= GrowSpeed * 3
+        @length -= this_length*2
         if @length <= 0
           @length  = 0
           hide
         end
-        @from.add_life((GrowSpeed*3)*LengthFactor)
-        update_line
+        @from.add_life(this_length*2*LengthFactor)
+        update_suckers
       when :cutted
-
       when :hidden
       when :created
         # nothing
@@ -48,22 +50,33 @@ class Tentacle
     end
   end
 
-  def update_line
-    x = @from.x + (@to.x-@from.x)*(@length/@distance)
-    y = @from.y + (@to.y-@from.y)*(@length/@distance)
-    @line.points = [[@from.x, @from.y], [x, y]]
+  def update_suckers
+    @sucker_nb = (@length / Sucker::Size).to_i
+    update_sucker_pool
+    (0..@sucker_nb-1).each { |i| @suckers[i].update } if @sucker_nb > 0
+    #@suckers[@sucker_nb-1].update if @sucker_nb > 0
+  end
+
+  def update_sucker_pool
+    while @suckers.size < @sucker_nb
+      @suckers << Sucker.new(@canvas, self, @suckers.size+1)
+    end
+    if @suckers.size > @sucker_nb
+      (@sucker_nb..@suckers.size-1).each { |i| @suckers[i].hide }
+    end
   end
 
   def hide
-    @line.hide
+    #@line.hide
     @state = :hidden
   end
 
   def deploy(to)
     @to       = to
-    @distance = distance(@from.x, @from.y, to.x, to.y)
-    @line.show
-    @line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
+    @distance = utils_distance(@from.x, @from.y, to.x, to.y)
+    #@line.show
+    #@line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
+    set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     @state    = :deploying
     @to.receive_tentacle(self)
     #@player.play(DEPLOYING)
@@ -84,19 +97,24 @@ class Tentacle
   def retract
     return if state == :retracting
     @to.detach_ennemy_tentacle(self)
-    @line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
+    set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     @state = :retracting
   end
 
   def change_team(team)
-    @line.fill_color_rgba = Colors[team]
     retract
+  end
+
+  def hide_all_suckers
+    @suckers.each { |s|
+      s.hide
+      }
   end
 
   def quick_retract
     @state = :hidden
-    @line.hide
     @length = 0
+    update_suckers
   end
 
   def cut(point)
@@ -109,8 +127,8 @@ class Tentacle
 
     if @state == :active
       quick_retract
-      retract_length = distance(@from.x, @from.y, point.x, point.y)
-      send_length    = distance(@to.x, @to.y, point.x, point.y)
+      retract_length = utils_distance(@from.x, @from.y, point.x, point.y)
+      send_length    = utils_distance(@to.x, @to.y, point.x, point.y)
       @from.add_life(retract_length*LengthFactor)
       if @to.team == @from.team
         @to.add_life(send_length*LengthFactor)
@@ -120,6 +138,12 @@ class Tentacle
         @to.remove_life(send_length*LengthFactor)
       end
     end
+  end
+
+  def destroy
+    @suckers.each { |s|
+      s.destroy
+      }
   end
 
 private
@@ -140,26 +164,31 @@ private
 
   def deploy_to_dist(dist)
     @state = :deploying
-    @line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
+    this_length = @time * GrowSpeed
+    set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     if @length > dist
-      @length -= GrowSpeed
+      @length -= this_length
       stop_deploy(dist) if @length <= dist
-      @from.add_life(GrowSpeed*LengthFactor)
+      @from.add_life(this_length*LengthFactor)
     else
-      @length += GrowSpeed
+      @length += this_length
       stop_deploy(dist) if @length >= dist
-      @from.remove_life(GrowSpeed*LengthFactor)
+      @from.remove_life(this_length*LengthFactor)
       retract if @from.life <= 1
     end
-    update_line
   end
 
   def stop_deploy(dist)
     @length = dist
     @state  = :active
-    @line.fill_color_rgba = Colors[@from.team]
+    set_color(Colors[@from.team])
   end
 
+  def set_color(c)
+    @suckers.each { |s|
+      s.set_color(c)
+      }
+  end
 
 end
 

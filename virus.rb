@@ -34,16 +34,16 @@ class Virus
     @ellipse.raise_to_top
     @lifetext.raise_to_top
     @size_factor = 20
-    update
+    update(0)
   end
 
-  def update_tentacles
-    @tentacles.each { |t|
-      t.update
+  def update_tentacles(time)
+    occupied_tentacles.each { |t|
+      t.update(time)
       }
   end
 
-  def update
+  def update(time)
     @life = @max if @life > @max
     @ellipse.x1 = @x-@size_factor
     @ellipse.x2 = @x+@size_factor
@@ -54,7 +54,7 @@ class Virus
     else
       @lifetext.markup = @life.round.to_s
     end
-    update_tentacles
+    update_tentacles(time)
   end
 
   def add_tentacle(destination_virus)
@@ -222,14 +222,14 @@ class Virus
 
   def enough_life?(v)
     return false if not v
-    distance(@x,@y, v.x,v.y)*LengthFactor+0.5 < @life
+    utils_distance(@x,@y, v.x,v.y)*LengthFactor+0.5 < @life
   end
 
   def nearest
     rv = nil
     nd = 1000
     @board.virus.select{|v| block_given? ? (yield v) : true }.each { |v|
-      d = distance(self.x, self.y, v.x, v.y)
+      d = utils_distance(self.x, self.y, v.x, v.y)
       rv = v and nd = d if d < nd
       }
     rv
@@ -241,6 +241,11 @@ class Virus
 
   def update_size
     @size_factor = 20 + @life/5
+  end
+
+  def destroy
+    @ellipse.destroy
+    @lifetext.destroy
   end
 
 end
