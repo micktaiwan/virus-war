@@ -197,7 +197,10 @@ class Virus
     # attack neutral
     if occupied_tentacles.size < @max_t
       n = nearest { |v| v.team == :neutral }
-      add_tentacle(n) and return if n
+      if enough_life?(n)
+        add_tentacle(n)
+        return
+      end
     end
 
     # do nothing else if life is too small
@@ -206,12 +209,20 @@ class Virus
     # attack nearest ennemy with less life
     if occupied_tentacles.size < @max_t
       e = nearest { |v| v.team != :neutral and v.team != @team }
-      add_tentacle(e) and return if e and e.life < @life - 5 # TODO: change 5 by actual cost to deploy
+      if enough_life?(e)
+        add_tentacle(e)
+        return
+      end
     end
 
     # nothing else to do ? Recharge friends
     # TODO
 
+  end
+
+  def enough_life?(v)
+    return false if not v
+    distance(@x,@y, v.x,v.y)*LengthFactor+0.5 < @life
   end
 
   def nearest
