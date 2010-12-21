@@ -1,7 +1,9 @@
 class Brain
 
-  GrowFactor    = 0.5
+  TimeFactor    = 0.5
+  GrowFactor    = 2
   GiveFactor    = 0.2
+  AttackFactor  = 3
 
   def initialize(all_virus)
     @virus = all_virus
@@ -19,19 +21,19 @@ private
     time = Time.now - @time
     @virus.each{ |v|
       # time life
-      v.add_life(time*GrowFactor) if v.team != :neutral
+      v.add_life(time*TimeFactor) if v.team != :neutral
 
       # tentacles life
       nb = v.active_tentacles.size
       v.active_tentacles.each { |t|
         v.remove_life(time*GiveFactor*nb)  { |v| t.retract if v.life <= 1 }
         if t.to.team == v.team
-          t.to.add_life(time*factor(v))
+          t.to.add_life(time*GrowFactor*factor(v))
           t.retract if v.life <= 1
         elsif t.to.team != :neutral
-          t.to.remove_life(time*factor(v)){ |to| to.change_team(v.team) if to.life <= 1 }
+          t.to.remove_life(time*AttackFactor*factor(v)){ |to| to.change_team(v.team) if to.life <= 1 }
         else # neutral
-          t.to.contaminate(time*factor(v), v.team)
+          t.to.contaminate(time*AttackFactor*factor(v), v.team)
         end
         }
 
@@ -45,7 +47,7 @@ private
   end
 
   def factor(v)
-    v.life/100+1
+    v.life/150+1
   end
 
   def play_ennemies

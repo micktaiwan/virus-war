@@ -2,18 +2,38 @@ require 'gnomecanvas2'
 require 'boards'
 require 'virus'
 require 'brain'
+require 'wall'
 require 'utils'
 
 class Board < Gtk::VBox
 
   attr_reader :virus
-  attr_accessor :fps
+  attr_accessor :fps, :current_level
 
-  def read_board
-    @virus = []
-    Board1[:virus].each { |v|
+  def load_level
+    clear_game
+    Boards[@current_level][:virus].each { |v|
       @virus << Virus.new(@canvas, v, self)
+      } if Boards[@current_level][:virus]
+
+    Boards[@current_level][:walls].each { |v|
+      @walls << Wall.new(@canvas, v, self)
+      } if Boards[@current_level][:walls]
+  end
+
+  def clear_game
+    @virus.each { |v|
+      v.tentacles.each { |t|
+        t.line.destroy
+        }
+      v.ellipse.destroy
+      v.lifetext.destroy
       }
+    @virus.clear
+    @walls.each { |w|
+      w.line.destroy
+      }
+    @walls.clear
   end
 
   #def draw(resize=false)
@@ -38,6 +58,9 @@ class Board < Gtk::VBox
 
   def initialize()
     super()
+    @virus = []
+    @walls = []
+    @current_level = 5
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)
@@ -45,7 +68,7 @@ class Board < Gtk::VBox
     @canvas = Gnome::Canvas.new(true)
     @box.add(@canvas)
     #@board_number = 1
-    read_board()
+    load_level()
     @fps = Gnome::CanvasText.new(@canvas.root, {
       :x => 20,
       :y => 5,
@@ -134,19 +157,22 @@ class Board < Gtk::VBox
       next if v.team != :green
       v.occupied_tentacles.each { |t|
         next if t.state == :retracting
-        p = get_intersection(t, a,b,x,y)
+        p = get_intersection(t.from.x,t.from.y, t.to.x,t.to.y, a,b, x,y)
         next if not p
         t.cut(p)
         }
       }
   end
 
+  def check_walls(x1,y1, x2,y2)
+    @walls.each { |w|
+      return true if get_intersection(w.x1,w.y1, w.x2,w.y2, x1,y1, x2,y2)
+      }
+    return false
+  end
+
   # thanks to http://alienryderflex.com/intersect/
-  def get_intersection(t, cx, cy, dx, dy)
-    ax = t.from.x
-    ay = t.from.y
-    bx = t.to.x
-    by = t.to.y
+  def get_intersection(ax,ay, bx,by, cx,cy, dx,dy)
 
     #  Fail if either line segment is zero-length.
     return nil if ((ax==bx and ay==by) or (cx==dx and cy==dy))

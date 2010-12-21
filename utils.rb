@@ -2,8 +2,12 @@ Colors = {
   :red      => 0xAA3333FF,
   :green    => 0x33AA33FF,
   :black    => 0x000000FF,
+  :grey    => 0x666666FF,
   :neutral  => 0x999999FF
   }
+
+GrowSpeed = 0.07
+LengthFactor = 1.0/20
 
 
 class Point
