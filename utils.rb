@@ -10,8 +10,16 @@ Colors = {
 
 GrowSpeed = 200
 LengthFactor = 1.0/15
-
 GrowSpeedxLengthFactor = GrowSpeed*LengthFactor
+
+SOUNDS = {
+  :deploying => 'deploying.wav',
+  :active => 'charge.wav',
+  :start => 'bulles.wav',
+  :cut => 'throw.wav',
+  :change => 'axe_throw.wav',
+  :lost => 'lost.wav'
+  }
 
 class Point
 

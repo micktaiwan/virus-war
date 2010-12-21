@@ -1,4 +1,3 @@
-#require 'player'
 require 'utils'
 require 'sucker'
 
@@ -14,7 +13,6 @@ class Tentacle
     @state    = :created
     @length   = 0.0
     @distance = 0.0
-    #@player = Player.new
     deploy(to)
   end
 
@@ -72,6 +70,7 @@ class Tentacle
   end
 
   def deploy(to)
+    @@player.play(:deploying)
     @to       = to
     @distance = utils_distance(@from.x, @from.y, to.x, to.y)
     #@line.show
@@ -126,6 +125,7 @@ class Tentacle
     end
 
     if @state == :active
+      @@player.play(:cut)
       quick_retract
       retract_length = utils_distance(@from.x, @from.y, point.x, point.y)
       send_length    = utils_distance(@to.x, @to.y, point.x, point.y)
@@ -181,6 +181,7 @@ private
   end
 
   def stop_deploy(dist)
+    @@player.play(:active)
     @length = dist
     @state  = :active
     set_color(Colors[@from.team])

@@ -154,6 +154,7 @@ class Virus
 
 
   def change_team(team)
+    @@player.play(:change)
     @team = team
     @life += @start
     @ellipse.fill_color_rgba = Colors[team]

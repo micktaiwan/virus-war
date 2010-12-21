@@ -1,5 +1,10 @@
 #!/usr/bin/env ruby
 require 'board'
+require 'utils'
+require 'player'
+
+@@player = Player.new(SOUNDS)
+@@player.play(:start)
 
 class Viewer < Gtk::Window
   def initialize(board)
@@ -38,6 +43,7 @@ loop {
     board.fps.markup = (board.current_level+1).to_s
     board.load_level
   elsif board.virus.select{ |v| v.team == :green}.size == 0
+    @@player.play(:lost)
     while (Gtk.events_pending?)
       Gtk.main_iteration
     end
@@ -53,4 +59,8 @@ loop {
   break if board.destroyed?
   #board.fps.markup = ((Time.now - t)*10000).to_i.to_s
   }
+
+
+@@player.quit
+#Gtk.main_quit
 

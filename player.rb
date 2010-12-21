@@ -11,19 +11,20 @@ require 'sdl'
 
 class Player
 
-  def initialize
+  def initialize(sounds)
     SDL::init(SDL::INIT_AUDIO)
-    SDL::Mixer.open(22050*2,SDL::Mixer::FORMAT_U8,2,1024)
+    SDL::Mixer.open(22050,SDL::Mixer::FORMAT_S16,2,4096)
     SDL::Mixer.set_volume_music(255)
+    @sounds = Hash.new
+    sounds.each_pair { |id, file|
+      print "loading #{id}... "
+      @sounds[id] = SDL::Mixer::Wave.load("sounds/"+file)
+      puts 'ok'
+      }
   end
 
-  def play(file)
-    puts 'play'
-    loops     = 1
-    filename  = "sounds/"+file
-    @music     = SDL::Mixer::Music.load(filename)
-    SDL::Mixer.play_music(@music,loops)
-    puts 'ok'
+  def play(id)
+    SDL::Mixer.play_channel(-1,@sounds[id],0)
   end
 
   def quit
@@ -32,5 +33,5 @@ class Player
 
 end
 
-# Player.new.play('bad.wav')
+#Player.new.play('axe_throw.wav')
 
