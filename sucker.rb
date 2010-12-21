@@ -13,7 +13,7 @@ class Sucker
     @canvas, @tentacle, @pos = canvas, tentacle, pos
     @x, @y = 0, 0
     @ellipse = Gnome::CanvasEllipse.new(@canvas.root, {
-      :fill_color_rgba => Colors[@tentacle.from.team]})
+      :fill_color_rgba => Colors[(@tentacle.from.team.to_s+"deploy").to_sym]})
     @ellipse.lower_to_bottom
     @ellipse.raise(1)
     update

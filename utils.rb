@@ -8,7 +8,7 @@ Colors = {
   :neutral  => 0x999999FF
   }
 
-GrowSpeed = 120
+GrowSpeed = 200
 LengthFactor = 1.0/15
 
 GrowSpeedxLengthFactor = GrowSpeed*LengthFactor

@@ -50,9 +50,9 @@ class Virus
     @ellipse.y1 = @y-@size_factor
     @ellipse.y2 = @y+@size_factor
     if @team == :neutral
-      @lifetext.markup = @contamination.round.to_s
+      @lifetext.markup = @contamination.to_i.to_s
     else
-      @lifetext.markup = @life.round.to_s
+      @lifetext.markup = @life.to_i.to_s
     end
     update_tentacles(time)
   end
@@ -118,7 +118,7 @@ class Virus
     else
       @contamination -= l
       if @contamination <= 0
-        @contamination = 1
+        @contamination = -@contamination
         @contaminate_team = team
       end
     end
@@ -155,7 +155,7 @@ class Virus
 
   def change_team(team)
     @team = team
-    @life = @start
+    @life += @start
     @ellipse.fill_color_rgba = Colors[team]
     @tentacles.each { |t|
       t.change_team(team)
@@ -240,7 +240,11 @@ class Virus
   end
 
   def update_size
-    @size_factor = 20 + @life/5
+    if @team != :neutral
+      @size_factor = 20 + @life/5
+    else
+      @size_factor = 20 + @start/5
+    end
   end
 
   def destroy

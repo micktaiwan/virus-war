@@ -136,6 +136,7 @@ class Tentacle
         @to.contaminate(send_length*LengthFactor, @from.team)
       else
         @to.remove_life(send_length*LengthFactor)
+        puts send_length*LengthFactor
       end
     end
   end
@@ -163,9 +164,10 @@ private
   end
 
   def deploy_to_dist(dist)
-    @state = :deploying
+    return if @length == dist
+    #@state = :deploying
+    #set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     this_length = @time * GrowSpeed
-    set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     if @length > dist
       @length -= this_length
       stop_deploy(dist) if @length <= dist
