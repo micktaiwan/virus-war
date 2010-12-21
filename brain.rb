@@ -26,7 +26,7 @@ private
       # tentacles life
       nb = v.active_tentacles.size
       v.active_tentacles.each { |t|
-        v.remove_life(time*GiveFactor*nb)  { |v| t.retract if v.life <= 1 }
+        v.remove_life(time*GiveFactor*nb/2)  { |v| t.retract if v.life <= 1 }
         if t.to.team == v.team
           t.to.add_life(time*GrowFactor*factor(v))
           t.retract if v.life <= 1
