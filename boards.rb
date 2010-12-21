@@ -1,9 +1,8 @@
 Boards = [
   {
   :virus => [
-    {:x=>30, :y=>30, :team=>:red,     :start=>1, :max=>100, :max_t=>2},
-    {:x=>170, :y=>170, :team=>:neutral,     :start=>10, :max=>100, :max_t=>2},
-    {:x=>330, :y=>330, :team=>:green,   :start=>20, :max=>100, :max_t=>2}
+    {:x=>230, :y=>230, :team=>:red,     :start=>5, :max=>100, :max_t=>2},
+    {:x=>380, :y=>380, :team=>:green,   :start=>20, :max=>100, :max_t=>2}
     ]
   },
   {

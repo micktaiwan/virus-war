@@ -3,7 +3,7 @@ class Brain
   TimeFactor    = 0.5
   GrowFactor    = 2
   GiveFactor    = 0.2
-  AttackFactor  = 3
+  AttackFactor  = 1
 
   def initialize(all_virus)
     @virus = all_virus

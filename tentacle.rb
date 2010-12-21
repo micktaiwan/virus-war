@@ -23,33 +23,12 @@ class Tentacle
     #puts @state.to_s + ' ' + Time.now.to_s
     case @state
       when :deploying
-        t = @to.find_all(@from)
-        if t
-          if t.length > @distance / 2
-            dist = @distance/2
-          else
-            dist = @distance - t.length
-          end
-        else
-          dist = @distance
-        end
-        @length += GrowSpeed
-        if @length >= dist
-          @length = dist
-          @state  = :active
-          @line.fill_color_rgba = Colors[@from.team]
-        end
-        @from.remove_life(GrowSpeed*LengthFactor)
-        retract if @from.life <= 1
-        update_line
+        animate_deploy
       when :active
         if @to.find_all(@from)
-          @length = @distance/2
-          update_line
+          deploy_to_dist(@distance/2)
         else
-          if @length < @distance
-            @state = :deploying
-          end
+          @state = :deploying if @length < @distance
         end
       when :retracting
         @length -= GrowSpeed * 3
@@ -84,7 +63,7 @@ class Tentacle
     @to       = to
     @distance = distance(@from.x, @from.y, to.x, to.y)
     @line.show
-    @line.fill_color_rgba = Colors[:grey]
+    @line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
     @state    = :deploying
     @to.receive_tentacle(self)
     #@player.play(DEPLOYING)
@@ -105,7 +84,7 @@ class Tentacle
   def retract
     return if state == :retracting
     @to.detach_ennemy_tentacle(self)
-    @line.fill_color_rgba = Colors[:grey]
+    @line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
     @state = :retracting
   end
 
@@ -117,6 +96,7 @@ class Tentacle
   def quick_retract
     @state = :hidden
     @line.hide
+    @length = 0
   end
 
   def cut(point)
@@ -131,9 +111,6 @@ class Tentacle
       quick_retract
       retract_length = distance(@from.x, @from.y, point.x, point.y)
       send_length    = distance(@to.x, @to.y, point.x, point.y)
-
-      puts "r: #{retract_length}, s: #{send_length}, d: #{distance(@to.x, @to.y, @from.x, @from.y)}"
-
       @from.add_life(retract_length*LengthFactor)
       if @to.team == @from.team
         @to.add_life(send_length*LengthFactor)
@@ -143,16 +120,46 @@ class Tentacle
         @to.remove_life(send_length*LengthFactor)
       end
     end
-
-=begin
-    Gnome::CanvasEllipse.new(@canvas.root, {
-      :x1 => point.x-3,
-      :x2 => point.x+3,
-      :y1 => point.y-3,
-      :y2 => point.y+3,
-      :fill_color => "red"})
-=end
   end
+
+private
+
+  def animate_deploy
+    t = @to.find_all(@from)
+    if t
+      if t.length > @distance / 2
+        dist = @distance/2
+      else
+        dist = @distance - t.length
+      end
+    else
+      dist = @distance
+    end
+    deploy_to_dist(dist)
+  end
+
+  def deploy_to_dist(dist)
+    @state = :deploying
+    @line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
+    if @length > dist
+      @length -= GrowSpeed
+      stop_deploy(dist) if @length <= dist
+      @from.add_life(GrowSpeed*LengthFactor)
+    else
+      @length += GrowSpeed
+      stop_deploy(dist) if @length >= dist
+      @from.remove_life(GrowSpeed*LengthFactor)
+      retract if @from.life <= 1
+    end
+    update_line
+  end
+
+  def stop_deploy(dist)
+    @length = dist
+    @state  = :active
+    @line.fill_color_rgba = Colors[@from.team]
+  end
+
 
 end
 

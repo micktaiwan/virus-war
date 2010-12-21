@@ -34,8 +34,15 @@ loop {
     board.fps.markup = (board.current_level+1).to_s
     if Boards.size <= board.current_level
       puts "You won !"
-      break
+      board.current_level = 0
     end
+    board.load_level
+  elsif board.virus.select{ |v| v.team == :green}.size == 0
+    while (Gtk.events_pending?)
+      Gtk.main_iteration
+    end
+    sleep(3)
+    board.fps.markup = (board.current_level+1).to_s
     board.load_level
   end
 
