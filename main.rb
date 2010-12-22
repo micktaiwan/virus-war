@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+
+# See Sounds instructions in player.rb
+
 require 'board'
 require 'utils'
 require 'player'
