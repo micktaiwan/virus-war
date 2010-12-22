@@ -29,13 +29,11 @@ private
           t.retract if v.life <= 1
         elsif t.to.team != :neutral
           t.to.remove_life(time*factor(v, nb)){ |to| to.change_team(v.team) if to.life <= 1 }
+          # TODO: if life < 1, first retract tentacles before changing team
         else # neutral
           t.to.contaminate(time*factor(v, nb), v.team)
         end
         }
-
-      # virus size
-      v.update_size
 
       # virus animation
       v.update(time)

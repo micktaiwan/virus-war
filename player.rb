@@ -22,14 +22,16 @@ class Player
     SDL::Mixer.set_volume_music(255)
     @sounds = Hash.new
     sounds.each_pair { |id, file|
-      print "loading #{id}... "
       @sounds[id] = SDL::Mixer::Wave.load("sounds/"+file)
-      puts 'ok'
       }
   end
 
   def play(id)
-    SDL::Mixer.play_channel(-1,@sounds[id],0)
+    begin
+      SDL::Mixer.play_channel(-1,@sounds[id],0)
+    rescue Exception => e
+      puts e.message
+    end
   end
 
   def quit

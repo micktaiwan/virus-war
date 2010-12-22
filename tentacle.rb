@@ -3,7 +3,7 @@ require 'sucker'
 
 class Tentacle
 
-  attr_reader :from, :to, :state, :length, :distance
+  attr_reader :from, :to, :state, :length, :distance, :sucker_nb
   # DEPLOYING = 'zipper.wav'
 
   def initialize(canvas, from, to)

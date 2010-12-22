@@ -55,6 +55,7 @@ class Virus
       @lifetext.markup = @life.to_i.to_s
     end
     update_tentacles(time)
+    update_size
   end
 
   def add_tentacle(destination_virus)
@@ -170,8 +171,8 @@ class Virus
     if @receiving_tentacles.size > 0 and occupied_tentacles.size < @max_t
       ennemies_tentacles.each { |t|
         add_tentacle(t.from)
-        return
         }
+      return
     end
 
     # retract tentacle if not attacked and life is inferior
@@ -216,9 +217,7 @@ class Virus
       end
     end
 
-    # nothing else to do ? Recharge friends
-    # TODO
-
+    # TODO: nothing else to do ? Recharge friends
   end
 
   def enough_life?(v)
@@ -242,7 +241,7 @@ class Virus
 
   def update_size
     if @team != :neutral
-      @size_factor = 20 + @life/5
+      @size_factor = Math.cos(Time.now.to_f*3) + 20 + @life/5
     else
       @size_factor = 20 + @start/5
     end

@@ -57,17 +57,15 @@ class Board < Gtk::VBox
 
   def initialize()
     super()
-    @virus = []
-    @walls = []
-    @current_level = 0
+    @virus          = []
+    @walls          = []
+    @current_level  = 4
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)
     set_size_request((@width = 48)+(@pad*2), (@height = 48)+(@pad*2))
     @canvas = Gnome::Canvas.new(true)
     @box.add(@canvas)
-    #@board_number = 1
-    load_level()
     @fps = Gnome::CanvasText.new(@canvas.root, {
       :x => 20,
       :y => 5,
@@ -129,26 +127,23 @@ class Board < Gtk::VBox
       false
     end
 
-    #@box.signal_connect('expose_event') do |owner, ev|
-    #  draw_board
-    #end
-
-    #signal_connect_after('show') {|w,e| start() }
-    #signal_connect_after('hide') {|w,e| stop() }
+    signal_connect_after('show') {|w,e| start() }
+    signal_connect_after('hide') {|w,e| stop() }
 
     @canvas.show()
     @box.show()
     show()
+    load_level()
 
   end
 
   def start
-  	#@tid= Gtk::timeout_add(1000) { draw_board(); true }
+    @@player.play(:start)
+  	@started = true
   end
 
   def stop
-	  Gtk::timeout_remove(@tid) if @tid
-	  @tid = nil
+  	@started = false
   end
 
   def cut(a,b,x,y)
@@ -164,9 +159,7 @@ class Board < Gtk::VBox
   end
 
   def check_walls(x1,y1, x2,y2)
-    @walls.each { |w|
-      return true if get_intersection(w.x1,w.y1, w.x2,w.y2, x1,y1, x2,y2)
-      }
+    @walls.each { |w| return true if get_intersection(w.x1,w.y1, w.x2,w.y2, x1,y1, x2,y2) }
     return false
   end
 

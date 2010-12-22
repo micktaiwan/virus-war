@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 
 # See Sounds instructions in player.rb
+# Search todos: grep -r TODO *
 
 require 'board'
 require 'utils'
 require 'player'
 
 @@player = Player.new(SOUNDS)
-@@player.play(:start)
 
 class Viewer < Gtk::Window
   def initialize(board)

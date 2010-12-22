@@ -4,7 +4,7 @@ require 'utils'
 
 class Sucker
 
-  Size      = 10
+  Size      = 12
   Sizeby2   = Size/2
   Deviation = 1
   SinSpeed  = 4
@@ -25,10 +25,11 @@ class Sucker
     @x = @tentacle.from.x + (@tentacle.to.x-@tentacle.from.x)*(@pos*Size / @tentacle.distance)
     @y = @tentacle.from.y + (@tentacle.to.y-@tentacle.from.y)*(@pos*Size / @tentacle.distance)
     t = (Time.now.to_f)*SinSpeed
-    @ellipse.x1 = @x-Sizeby2+Math.cos(t+@pos)*Deviation
-    @ellipse.x2 = @x+Sizeby2+Math.cos(t+@pos)*Deviation
-    @ellipse.y1 = @y-Sizeby2+Math.sin(t+@pos)*Deviation
-    @ellipse.y2 = @y+Sizeby2+Math.sin(t+@pos)*Deviation
+    nb = Sizeby2#(@tentacle.sucker_nb - @pos)/4 + Sizeby2
+    @ellipse.x1 = @x-nb+Math.cos(t+@pos)*Deviation
+    @ellipse.x2 = @x+nb+Math.cos(t+@pos)*Deviation
+    @ellipse.y1 = @y-nb+Math.sin(t+@pos)*Deviation
+    @ellipse.y2 = @y+nb+Math.sin(t+@pos)*Deviation
   end
 
   def set_color(c)
