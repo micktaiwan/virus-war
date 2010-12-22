@@ -8,9 +8,10 @@ Colors = {
   :neutral  => 0x999999FF
   }
 
-GrowSpeed = 200
-LengthFactor = 1.0/15
+GrowSpeed     = 200
+LengthFactor  = 1.0/15
 GrowSpeedxLengthFactor = GrowSpeed*LengthFactor
+TimeFactor    = 0.5
 
 SOUNDS = {
   :deploying => 'deploying.wav',
@@ -39,5 +40,9 @@ end
 
 def utils_distance(a,b,x,y)
   Math.sqrt( (((x-a)**2) + ((y-b)**2)).abs )
+end
+
+def factor(life,tentacle_nb)
+  1 + (life/tentacle_nb)/25
 end
 

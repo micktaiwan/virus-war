@@ -136,7 +136,6 @@ class Tentacle
         @to.contaminate(send_length*LengthFactor, @from.team)
       else
         @to.remove_life(send_length*LengthFactor)
-        puts send_length*LengthFactor
       end
     end
   end

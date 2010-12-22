@@ -37,13 +37,20 @@ class Virus
     update(0)
   end
 
+  def update(time)
+    update_life(time)
+    update_pos
+    update_tentacles(time)
+    update_size
+  end
+
   def update_tentacles(time)
     occupied_tentacles.each { |t|
       t.update(time)
       }
   end
 
-  def update(time)
+  def update_pos
     @life = @max if @life > @max
     @ellipse.x1 = @x-@size_factor
     @ellipse.x2 = @x+@size_factor
@@ -54,8 +61,37 @@ class Virus
     else
       @lifetext.markup = @life.to_i.to_s
     end
-    update_tentacles(time)
-    update_size
+  end
+
+  def retract_to_survive
+    active_tentacles.each { |t|
+      next if t.duel?
+      t.retract
+      return true
+      }
+    return false  
+  end
+
+  def update_life(time)
+    # time life
+    add_life(time*TimeFactor) if @team != :neutral
+
+    # tentacles life
+    nb = active_tentacles.size
+    active_tentacles.each { |t|
+      #v.remove_life(time*factor(v,nb)*nb)  { |v| t.retract if v.life <= 1 }
+      if t.to.team == @team
+        t.to.add_life(time*factor(@life,nb))
+        t.retract if @life <= 1
+      elsif t.to.team != :neutral
+        t.to.remove_life(time*factor(@life, nb)){ |to|
+          to.change_team(@team) if to.life <= 1 and not to.retract_to_survive
+          }
+        # TODO: if life < 1, first retract tentacles before changing team
+      else # neutral
+        t.to.contaminate(time*factor(@life, nb), @team)
+      end
+      }
   end
 
   def add_tentacle(destination_virus)
@@ -170,7 +206,7 @@ class Virus
     # attack if attacked
     if @receiving_tentacles.size > 0 and occupied_tentacles.size < @max_t
       ennemies_tentacles.each { |t|
-        add_tentacle(t.from)
+        add_tentacle(t.from) if(enough_life?(t.from, :half))
         }
       return
     end
@@ -220,9 +256,9 @@ class Virus
     # TODO: nothing else to do ? Recharge friends
   end
 
-  def enough_life?(v)
+  def enough_life?(v, length=:full)
     return false if not v
-    utils_distance(@x,@y, v.x,v.y)*LengthFactor+0.5 < @life
+    (utils_distance(@x,@y, v.x,v.y)*LengthFactor+1) / (length==:half ? 2 : 1) < @life
   end
 
   def nearest
