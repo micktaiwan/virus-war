@@ -7,7 +7,7 @@
 #
 # Windows:
 # Read:  http://www.kmc.gr.jp/~ohai/rubysdl_download.en.html
-# 1) Doanload rubysdl-win32-bin on rubyforge (http://rubyforge.org/frs/?group_id=1006)
+# 1) Download rubysdl-win32-bin on rubyforge (http://rubyforge.org/frs/?group_id=1006)
 # 2) go to the directory and type ruby install_rubysdl.rb
 # ================================
 
