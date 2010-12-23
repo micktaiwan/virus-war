@@ -24,7 +24,8 @@ SOUNDS = {
   :cut => 'throw.wav',
   :change => 'axe_throw.wav',
   :lost => 'lost.wav',
-  :not_enough_life => 'error.wav'
+  :not_enough_life => 'error.wav',
+  :error => 'error.wav'
   }
 
 class Point

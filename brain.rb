@@ -8,6 +8,7 @@ class Brain
   def iterate
     update_virus
     play_ennemies
+    sleep(0.001)
   end
 
 private

@@ -66,6 +66,7 @@ class Virus
   def retract_to_survive
     rv = false
     occupied_tentacles.each { |t|
+      next if t.state == :retracting
       t.retract
       rv = true
       }
@@ -92,23 +93,25 @@ class Virus
   end
 
   def add_tentacle(destination_virus)
+    puts "same virus" and return if self == destination_virus
+
     # check for walls
     return false if @board.check_walls(@x,@y, destination_virus.x, destination_virus.y)
 
     # check if already exists
     return false if find_all(destination_virus)
 
-    #return if destination_virus.find(self)
-    s = occupied_tentacles.size
-    return false if s >= @max_t
+    # check if available tentacles
+    return false if occupied_tentacles.size >= @max_t
+    
     if @tentacles.size >= @max_t
       find_next_hidden.deploy(destination_virus)
     else
       @tentacles << Tentacle.new(@canvas, self, destination_virus)
     end
     # if same team and connected already
-    if destination_virus.team == @team and t = destination_virus.find_all(self)
-      t.retract
+    if destination_virus.team == @team and t = destination_virus.find_all(self) and t
+      t.retract 
     end
     return true
   end
@@ -161,11 +164,7 @@ class Virus
   def remove_life(l, team)
     @life -= l
     if @life < 1 and not retract_to_survive
-      if(team == @team)
-        puts "#{team} impossible?"
-      else
-        change_team(team)
-      end   
+      change_team(team)
     end
     #yield self if block_given?
   end
@@ -197,7 +196,6 @@ class Virus
     @@player.play(:change)
     @team = team
     @life += @start
-    puts team
     @ellipse.fill_color_rgba = Colors[team]
     @tentacles.each { |t|
       t.change_team(team)
@@ -207,12 +205,16 @@ class Virus
   # make an "intelligent" action
   def play
 
+    ots = occupied_tentacles.size
+    ets = ennemies_tentacles.size
+    ats = active_tentacles.size
+    
     # attack if attacked
-    if @receiving_tentacles.size > 0 and occupied_tentacles.size < @max_t
+    if ets > 0 and ots < @max_t and ots == ats
       ennemies_tentacles.each { |t|
         add_tentacle(t.from) if(enough_life?(t.from, :half))
+        return
         }
-      return
     end
 
     # retract tentacle if not attacked and life is inferior
@@ -220,10 +222,10 @@ class Virus
     #  t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+10 < t.to.life
     #  }
 
-    # remove useless tentacles: to same team not attacked
+    # remove useless tentacles: to same team not attacked with more life (attention to rule below when connecting friends with less life)
     occupied_tentacles.each { |t|
       next if t.state == :retracting
-      t.retract if t.to.team != :neutral and t.to.team == @team and t.to.ennemies_tentacles.size == 0
+      t.retract if t.to.team == @team and t.to.life > @life and t.to.ennemies_tentacles.size == 0
       }
 
     # remove useless tentacles: from neutral when attacked
@@ -237,29 +239,41 @@ class Virus
     end
 
     # attack neutral
-    if occupied_tentacles.size < @max_t
+    if ots < @max_t
       n = nearest { |v| v.team == :neutral }
-      if enough_life?(n)
+      if n and enough_life?(n)
         add_tentacle(n)
         return
       end
     end
 
     # attack nearest ennemy with less life
-    if occupied_tentacles.size < @max_t
+    if ots < @max_t
       e = nearest { |v| v.team != :neutral and v.team != @team }
-      if e.life < @life and enough_life?(e)
+      if e and e.life < @life and enough_life?(e)
         add_tentacle(e)
         return
       end
     end
 
-    # TODO: nothing else to d: recharge friends
+    # recharge friends
+    if ots < @max_t and @tentacles.select { |t| t.state==:deploying }.size == 0 # if deploying life is less than displayed
+      e = nearest { |v| v.team == @team and v != self }
+      if e and e.life < (@life-deploy_cost(e))-1 and enough_life?(e)
+        add_tentacle(e)
+        return
+      end
+    end
+    
   end
 
+  def deploy_cost(v)
+    utils_distance(@x,@y, v.x,v.y)*LengthFactor
+  end
+  
   def enough_life?(v, length=:full)
-    return false if not v
-    ((utils_distance(@x,@y, v.x,v.y)*LengthFactor) / (length==:half ? 2 : 1))+1 < @life # +1 as virus are dead if life < 1
+    raise "no virus" if not v
+    (deploy_cost(v) / (length==:half ? 1.95 : 1))+1 < @life # +1 as virus are dead if life < 1
   end
 
   def nearest

@@ -27,6 +27,7 @@ class Player
   end
 
   def play(id)
+    raise "Sound '#{id}' does not exists" if @sounds[id] == nil
     begin
       SDL::Mixer.play_channel(-1,@sounds[id],0)
     rescue Exception => e

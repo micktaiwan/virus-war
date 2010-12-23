@@ -47,7 +47,7 @@ Boards = [
     {:x=>350,  :y=>150,  :team=>:neutral, :start=>10, :max=>100, :max_t=>2},
     {:x=>400,  :y=>100,  :team=>:neutral, :start=>10, :max=>100, :max_t=>2},
     {:x=>450,  :y=>50,   :team=>:neutral, :start=>10, :max=>100, :max_t=>2},
-    {:x=>490,  :y=>490,  :team=>:neutral, :start=>10, :max=>200, :max_t=>2},
+    {:x=>550,  :y=>450,  :team=>:neutral, :start=>10, :max=>200, :max_t=>2},
     {:x=>50,   :y=>50,   :team=>:green,   :start=>30, :max=>150, :max_t=>2}
     ],
   },
