@@ -25,7 +25,7 @@ class Sucker
     @y = @tentacle.from.y + (@tentacle.to.y-@tentacle.from.y)*(@pos*Size / @tentacle.distance)
     if @x.to_s == "NaN"
       puts "error"
-      puts "distance = @tentacle.distance"
+      puts "distance = #{@tentacle.distance}"
     end
     # see if cut and if it needs to be hidden
     if @tentacle.state == :cut

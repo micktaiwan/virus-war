@@ -257,7 +257,7 @@ class Virus
       end
     end
 
-    # TODO: nothing else to do ? Recharge friends
+    # TODO: nothing else to d: recharge friends
   end
 
   def enough_life?(v, length=:full)
