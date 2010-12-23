@@ -7,9 +7,16 @@ Boards = [
   },
   {
   :virus => [
-    {:x=>340,  :y=>200,  :team=>:red,     :start=>15,  :max=>50, :max_t=>2},
+    {:x=>340,  :y=>200,  :team=>:red,     :start=>10,  :max=>50, :max_t=>2},
     {:x=>360,  :y=>360,  :team=>:neutral, :start=>10, :max=>50, :max_t=>2},
-    {:x=>200,  :y=>390,  :team=>:green,   :start=>40, :max=>50, :max_t=>2},
+    {:x=>200,  :y=>390,  :team=>:green,   :start=>20, :max=>50, :max_t=>2},
+    ]
+  },
+  {
+  :virus => [
+    {:x=>340,  :y=>200,  :team=>:red,     :start=>30,  :max=>50, :max_t=>2},
+    {:x=>360,  :y=>360,  :team=>:neutral, :start=>10, :max=>50, :max_t=>2},
+    {:x=>200,  :y=>390,  :team=>:green,   :start=>30, :max=>50, :max_t=>2},
     ],
   :walls => [[230,260, 320,340]]
    },
@@ -18,7 +25,7 @@ Boards = [
     {:x=>190,  :y=>190, :team=>:red,     :start=>10, :max=>50, :max_t=>2},
     {:x=>360, :y=>190,  :team=>:neutral, :start=>10, :max=>50, :max_t=>2},
     {:x=>190, :y=>360,  :team=>:neutral, :start=>10, :max=>50, :max_t=>2},
-    {:x=>370, :y=>360,  :team=>:green,   :start=>20, :max=>50, :max_t=>2},
+    {:x=>370, :y=>360,  :team=>:green,   :start=>10, :max=>50, :max_t=>2},
     ],
     :walls => [[340,230, 230,320]]
   },

@@ -139,7 +139,7 @@ class Virus
     @receiving_tentacles << t
   end
 
-  def detach_ennemy_tentacle(t)
+  def detach_tentacle(t)
     @receiving_tentacles.delete(t)
   end
 
@@ -203,7 +203,7 @@ class Virus
   def change_team(team)
     @@player.play(:change)
     @team = team
-    @life += @start
+    @life = -@life + @start
     @ellipse.fill_color_rgba = Colors[team]
     @border.fill_color_rgba = Colors[("dark_"+@team.to_s).to_sym]
     @tentacles.each { |t|
@@ -226,23 +226,20 @@ class Virus
     end
 
     # retract tentacle if not attacked and life is inferior
-    #active_tentacles.each { |t|
-    #  t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+10 < t.to.life
-    #  }
+    active_tentacles.each { |t|
+      t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+10 < t.to.life
+      }
 
     # remove useless tentacles: to same team not attacked with more life (attention to rule below when connecting friends with less life)
     occupied_tentacles.each { |t|
       next if t.state == :retracting
-      t.retract if t.to.team == @team and t.to.life > @life and t.to.ennemies_tentacles.size == 0
+      t.retract if t.to.team == @team and t.to.life > @life+deploy_cost(t.to) and t.to.ennemies_tentacles.size == 0
       }
 
     # remove useless tentacles: from neutral when attacked
-    if @receiving_tentacles.size > 0  and occupied_tentacles.size >= @max_t
-      occupied_tentacles.each { |t|
-        if t.to.team == :neutral
-          t.retract
-          break
-        end
+    if ennemies_tentacles.size > 0  and occupied_tentacles.size >= @max_t
+      ennemies_tentacles.each { |t|
+        t.retract if t.to.team == :neutral
         }
     end
 
@@ -256,15 +253,13 @@ class Virus
     if ots < @max_t
       e = nearest { |v| v.team != @team and v.team != :neutral }
       return if e and e.life < @life and enough_life?(e) and add_tentacle(e)
+      # TODO: take in account the tentacles life
     end
 
     # recharge friends
     if ots < @max_t and @tentacles.select { |t| t.state==:deploying }.size == 0 # if deploying then life is less than displayed
       e = nearest { |v| v.team == @team and v != self }
-      if e and e.life < (@life-deploy_cost(e))-1#and enough_life?(e)
-        add_tentacle(e)
-        return
-      end
+      return if e and e.life < (@life-deploy_cost(e))-1 and add_tentacle(e)
     end
     
   end
@@ -274,7 +269,6 @@ class Virus
   end
   
   def enough_life?(v, length=:full)
-    raise "no virus" if not v
     (deploy_cost(v) / (length==:half ? 1.95 : 1))+1 < @life # +1 as virus are dead if life < 1
   end
 

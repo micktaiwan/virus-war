@@ -19,7 +19,7 @@ class Board < Gtk::VBox
     super()
     @virus          = []
     @walls          = []
-    @current_level  = 3
+    @current_level  = 2
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)

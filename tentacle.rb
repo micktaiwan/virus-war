@@ -23,50 +23,50 @@ class Tentacle
     this_length = @time * GrowSpeed
     @anim_pos += this_length
     @anim_pos = 0.0 if @anim_pos > @sucker_nb*Sucker::Size
-    #puts @state.to_s + ' ' + Time.now.to_s
+
     case @state
-      when :deploying
-        animate_deploy
-        update_suckers
-      when :active
-        if @to.find_all(@from)
-          deploy_to_dist(@distance/2)
-        else
-          @state = :deploying if @length < @distance
-        end
-        update_suckers
-      when :retracting
-        @length -= this_length*RetractFactor
-        if @length <= 0
-          @length  = 0
-          hide
-        end
-        @from.add_life(this_length*RetractFactorxLengthFactor)
-        update_suckers
-      when :cut
-        if @retract_length > 0
-          @retract_length -= this_length*CutFactor 
-          @retract_length  = 0 if @retract_length <= 0
-          @from.add_life(this_length*CutFactorxLengthFactor)
-        end
-        if @send_length > 0
-          @send_length    -= this_length*CutFactor  
-          @send_length     = 0 if @send_length <= 0
-          if @to.team == @from.team
-            @to.add_life(this_length*CutFactorxLengthFactor)
-          elsif @to.team == :neutral
-            @to.contaminate(this_length*CutFactorxLengthFactor, @from.team)
-          else # ennemy
-            @to.remove_life(this_length*CutFactorxLengthFactor, @from.team)
-          end       
-        end
-        update_suckers
-        hide if @retract_length == 0 and @send_length == 0
-      when :hidden
-      when :created
-        # nothing
+    when :deploying
+      animate_deploy
+      update_suckers
+    when :active
+      if @to.find_all(@from)
+        deploy_to_dist(@distance/2)
       else
-        raise "unknown state: #{state.to_s}"
+        @state = :deploying if @length < @distance
+      end
+      update_suckers
+    when :retracting
+      @length -= this_length*RetractFactor
+      if @length <= 0
+        @length  = 0
+        hide
+      end
+      @from.add_life(this_length*RetractFactorxLengthFactor)
+      update_suckers
+    when :cut
+      if @retract_length > 0
+        @retract_length -= this_length*CutFactor 
+        @retract_length  = 0 if @retract_length <= 0
+        @from.add_life(this_length*CutFactorxLengthFactor)
+      end
+      if @send_length > 0
+        @send_length    -= this_length*CutFactor  
+        @send_length     = 0 if @send_length <= 0
+        if @to.team == @from.team
+          @to.add_life(this_length*CutFactorxLengthFactor)
+        elsif @to.team == :neutral
+          @to.contaminate(this_length*CutFactorxLengthFactor, @from.team)
+        else # ennemy
+          @to.remove_life(this_length*CutFactorxLengthFactor, @from.team)
+        end       
+      end
+      update_suckers
+      hide if @retract_length == 0 and @send_length == 0
+    when :hidden
+    when :created
+      # nothing
+    else
+      raise "unknown state: #{state.to_s}"
     end
   end
 
@@ -107,7 +107,7 @@ class Tentacle
 
   def retract
     return if state == :retracting
-    @to.detach_ennemy_tentacle(self)
+    @to.detach_tentacle(self) if @state == :active
     set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     @state = :retracting
   end
