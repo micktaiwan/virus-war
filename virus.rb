@@ -64,12 +64,12 @@ class Virus
   end
 
   def retract_to_survive
-    active_tentacles.each { |t|
-      next if t.duel?
+    rv = false
+    occupied_tentacles.each { |t|
       t.retract
-      return true
+      rv = true
       }
-    return false  
+    rv  
   end
 
   def update_life(time)
@@ -79,14 +79,11 @@ class Virus
     # tentacles life
     nb = active_tentacles.size
     active_tentacles.each { |t|
-      #v.remove_life(time*factor(v,nb)*nb)  { |v| t.retract if v.life <= 1 }
       if t.to.team == @team
         t.to.add_life(time*factor(@life,nb))
         t.retract if @life <= 1
       elsif t.to.team != :neutral
-        t.to.remove_life(time*factor(@life, nb)){ |to|
-          to.change_team(@team) if to.life <= 1 and not to.retract_to_survive
-          }
+        t.to.remove_life(time*factor(@life, nb), t.from.team)
         # TODO: if life < 1, first retract tentacles before changing team
       else # neutral
         t.to.contaminate(time*factor(@life, nb), @team)
@@ -161,10 +158,16 @@ class Virus
     end
   end
 
-  def remove_life(l)
+  def remove_life(l, team)
     @life -= l
-    @life = 1 if @life < 1
-    yield self if block_given?
+    if @life < 1 and not retract_to_survive
+      if(team == @team)
+        puts "#{team} impossible?"
+      else
+        change_team(team)
+      end   
+    end
+    #yield self if block_given?
   end
 
   def active_tentacles
@@ -194,6 +197,7 @@ class Virus
     @@player.play(:change)
     @team = team
     @life += @start
+    puts team
     @ellipse.fill_color_rgba = Colors[team]
     @tentacles.each { |t|
       t.change_team(team)
@@ -247,7 +251,7 @@ class Virus
     # attack nearest ennemy with less life
     if occupied_tentacles.size < @max_t
       e = nearest { |v| v.team != :neutral and v.team != @team }
-      if enough_life?(e)
+      if e.life < @life and enough_life?(e)
         add_tentacle(e)
         return
       end

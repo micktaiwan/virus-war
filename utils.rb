@@ -10,7 +10,11 @@ Colors = {
 
 GrowSpeed     = 200
 LengthFactor  = 1.0/15
-GrowSpeedxLengthFactor = GrowSpeed*LengthFactor
+RetractFactor = 3
+CutFactor     = 6
+RetractFactorxLengthFactor = RetractFactor * LengthFactor
+CutFactorxLengthFactor = CutFactor * LengthFactor
+GrowSpeedxLengthFactor = GrowSpeed * LengthFactor
 TimeFactor    = 0.5
 
 SOUNDS = {
@@ -39,7 +43,12 @@ end
 
 
 def utils_distance(a,b,x,y)
-  Math.sqrt( (((x-a)**2) + ((y-b)**2)).abs )
+  begin
+    Math.sqrt( (((x-a)*(x-a)) + ((y-b)*(y-b))).abs )
+  rescue
+    puts  (((x-a)*(x-a)) + ((y-b)*(y-b))).abs
+    puts "#{a}, #{b}, #{x}, #{y}"
+  end  
 end
 
 def factor(life,tentacle_nb)

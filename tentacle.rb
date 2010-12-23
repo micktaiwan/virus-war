@@ -3,7 +3,7 @@ require 'sucker'
 
 class Tentacle
 
-  attr_reader :from, :to, :state, :length, :distance, :sucker_nb
+  attr_reader :from, :to, :state, :length, :distance, :sucker_nb, :retract_length, :send_length
   # DEPLOYING = 'zipper.wav'
 
   def initialize(canvas, from, to)
@@ -32,14 +32,32 @@ class Tentacle
         end
         update_suckers
       when :retracting
-        @length -= this_length*2
+        @length -= this_length*RetractFactor
         if @length <= 0
           @length  = 0
           hide
         end
-        @from.add_life(this_length*2*LengthFactor)
+        @from.add_life(this_length*RetractFactorxLengthFactor)
         update_suckers
-      when :cutted
+      when :cut
+        if @retract_length > 0
+          @retract_length -= this_length*CutFactor 
+          @retract_length  = 0 if @retract_length <= 0
+          @from.add_life(this_length*CutFactorxLengthFactor)
+        end
+        if @send_length > 0
+          @send_length    -= this_length*CutFactor  
+          @send_length     = 0 if @send_length <= 0
+          if @to.team == @from.team
+            @to.add_life(this_length*CutFactorxLengthFactor)
+          elsif @to.team == :neutral
+            @to.contaminate(this_length*CutFactorxLengthFactor, @from.team)
+          else # ennemy
+            @to.remove_life(this_length*CutFactorxLengthFactor, @from.team)
+          end       
+        end
+        update_suckers
+        hide if @retract_length == 0 and @send_length == 0
       when :hidden
       when :created
         # nothing
@@ -49,36 +67,35 @@ class Tentacle
   end
 
   def update_suckers
-    @sucker_nb = (@length / Sucker::Size).to_i
     update_sucker_pool
-    (0..@sucker_nb-1).each { |i| @suckers[i].update } if @sucker_nb > 0
+    @suckers.each { |s| s.update }
+    #(0..@sucker_nb-1).each { |i| @suckers[i].update } if @sucker_nb > 0
     #@suckers[@sucker_nb-1].update if @sucker_nb > 0
   end
 
   def update_sucker_pool
+    @sucker_nb = (@length / Sucker::Size).to_i
     while @suckers.size < @sucker_nb
       @suckers << Sucker.new(@canvas, self, @suckers.size+1)
     end
-    if @suckers.size > @sucker_nb
-      (@sucker_nb..@suckers.size-1).each { |i| @suckers[i].hide }
-    end
+#    if @suckers.size > @sucker_nb
+#      (@sucker_nb..@suckers.size-1).each { |i| @suckers[i].hide }
+#    end
   end
 
   def hide
     #@line.hide
     @state = :hidden
+    @length = 0
   end
 
   def deploy(to)
     @@player.play(:deploying)
     @to       = to
-    @distance = utils_distance(@from.x, @from.y, to.x, to.y)
-    #@line.show
-    #@line.fill_color_rgba = Colors[(@from.team.to_s+"deploy").to_sym]
+    @distance = utils_distance(@from.x, @from.y, @to.x, @to.y)
     set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     @state    = :deploying
     @to.receive_tentacle(self)
-    #@player.play(DEPLOYING)
   end
 
   def redeploy
@@ -110,11 +127,11 @@ class Tentacle
       }
   end
 
-  def quick_retract
-    @state = :hidden
-    @length = 0
-    update_suckers
-  end
+  #def quick_retract
+  #  @state = :hidden
+  #  @length = 0
+  #  update_suckers
+  #end
 
   def cut(point)
     return if @state == :retracting
@@ -123,21 +140,12 @@ class Tentacle
       retract
       d.redeploy if d
     end
+    return if @state != :active
 
-    if @state == :active
-      @@player.play(:cut)
-      quick_retract
-      retract_length = utils_distance(@from.x, @from.y, point.x, point.y)
-      send_length    = utils_distance(@to.x, @to.y, point.x, point.y)
-      @from.add_life(retract_length*LengthFactor)
-      if @to.team == @from.team
-        @to.add_life(send_length*LengthFactor)
-      elsif @to.team == :neutral
-        @to.contaminate(send_length*LengthFactor, @from.team)
-      else
-        @to.remove_life(send_length*LengthFactor)
-      end
-    end
+    @@player.play(:cut)
+    @retract_length = utils_distance(@from.x, @from.y, point.x, point.y)
+    @send_length    = utils_distance(@to.x, @to.y, point.x, point.y)
+    @state          = :cut
   end
 
   def destroy
@@ -174,7 +182,7 @@ private
     else
       @length += this_length
       stop_deploy(dist) if @length >= dist
-      @from.remove_life(this_length*LengthFactor)
+      @from.remove_life(this_length*LengthFactor, @from.team)
       retract if @from.life <= 1
     end
   end
