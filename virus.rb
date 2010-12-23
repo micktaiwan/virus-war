@@ -5,6 +5,8 @@ class Virus
   attr_accessor :x, :y, :team, :start, :tentacles
   attr_reader :life, :max, :max_t, :ellipse, :lifetext
 
+  BorderSize = 3
+
   def initialize(canvas, h, board)
     @board = board
     @canvas = canvas
@@ -23,6 +25,8 @@ class Virus
     @max_t  = h[:max_t]
     @tentacles    = []
     @receiving_tentacles = []
+    @border = Gnome::CanvasEllipse.new(@canvas.root, {
+      :fill_color_rgba => Colors[("dark_"+@team.to_s).to_sym]})
     @ellipse = Gnome::CanvasEllipse.new(@canvas.root, {
       :fill_color_rgba => Colors[@team]})
     @lifetext = Gnome::CanvasText.new(@canvas.root, {
@@ -31,6 +35,7 @@ class Virus
       :fill_color=>"white",
       :family=>"Arial",
       :markup => @life.to_s})
+    @border.raise_to_top
     @ellipse.raise_to_top
     @lifetext.raise_to_top
     @size_factor = 20
@@ -52,6 +57,10 @@ class Virus
 
   def update_pos
     @life = @max if @life > @max
+    @border.x1 = @x-@size_factor-BorderSize
+    @border.x2 = @x+@size_factor+BorderSize
+    @border.y1 = @y-@size_factor-BorderSize
+    @border.y2 = @y+@size_factor+BorderSize
     @ellipse.x1 = @x-@size_factor
     @ellipse.x2 = @x+@size_factor
     @ellipse.y1 = @y-@size_factor
@@ -96,8 +105,8 @@ class Virus
 
     # check for walls
     return false if @board.check_walls(@x,@y, destination_virus.x, destination_virus.y)
-
-    # check if already exists
+    
+    # check if tentacle already exists
     return false if find_all(destination_virus)
 
     # check if available tentacles
@@ -176,14 +185,14 @@ class Virus
     @tentacles.select { |t| t.state != :hidden}
   end
 
-  def find(to)
+  def find(to) # TODO add a block to filter virus found
     active_tentacles.each { |t|
       return t if t.from == self and t.to == to
       }
     return nil
   end
 
-  def find_all(to)
+  def find_all(to) # TODO no more needed if added filter with block to "find"
     occupied_tentacles.each { |t|
       return t if t.from == self and t.to == to
       }
@@ -196,6 +205,7 @@ class Virus
     @team = team
     @life += @start
     @ellipse.fill_color_rgba = Colors[team]
+    @border.fill_color_rgba = Colors[("dark_"+@team.to_s).to_sym]
     @tentacles.each { |t|
       t.change_team(team)
       }
@@ -211,8 +221,7 @@ class Virus
     # attack if attacked
     if ets > 0 and ots < @max_t and ots == ats
       ennemies_tentacles.each { |t|
-        add_tentacle(t.from) if(enough_life?(t.from, :half))
-        return
+        return if enough_life?(t.from, :half) and add_tentacle(t.from)
         }
     end
 
@@ -240,25 +249,19 @@ class Virus
     # attack neutral
     if ots < @max_t
       n = nearest { |v| v.team == :neutral }
-      if n and enough_life?(n)
-        add_tentacle(n)
-        return
-      end
+      return if n and enough_life?(n) and add_tentacle(n)
     end
 
     # attack nearest ennemy with less life
     if ots < @max_t
-      e = nearest { |v| v.team != :neutral and v.team != @team }
-      if e and e.life < @life and enough_life?(e)
-        add_tentacle(e)
-        return
-      end
+      e = nearest { |v| v.team != @team and v.team != :neutral }
+      return if e and e.life < @life and enough_life?(e) and add_tentacle(e)
     end
 
     # recharge friends
-    if ots < @max_t and @tentacles.select { |t| t.state==:deploying }.size == 0 # if deploying life is less than displayed
+    if ots < @max_t and @tentacles.select { |t| t.state==:deploying }.size == 0 # if deploying then life is less than displayed
       e = nearest { |v| v.team == @team and v != self }
-      if e and e.life < (@life-deploy_cost(e))-1 and enough_life?(e)
+      if e and e.life < (@life-deploy_cost(e))-1#and enough_life?(e)
         add_tentacle(e)
         return
       end
@@ -299,6 +302,7 @@ class Virus
 
   def destroy
     @ellipse.destroy
+    @border.destroy
     @lifetext.destroy
   end
 

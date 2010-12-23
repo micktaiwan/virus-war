@@ -1,7 +1,11 @@
 Colors = {
   :red            => 0xAA3333FF,
   :green          => 0x33AA33FF,
-  :black          => 0x000000FF,
+  :black          => 0x333333FF,
+  :dark_red       => 0x770000FF,
+  :dark_green     => 0x007700FF,
+  :dark_black     => 0x000000FF,
+  :dark_neutral   => 0x444444FF,
   :reddeploy      => 0xFF8888FF,
   :greendeploy    => 0x88FF88FF,
   :blackdeploy    => 0x555555FF,

@@ -1,77 +1,43 @@
 require 'gnomecanvas2'
 require 'boards'
 require 'virus'
-require 'brain'
+#require 'brain'
 require 'wall'
 require 'utils'
+
+
+# TODO: teams force indicator
+
 
 class Board < Gtk::VBox
 
   attr_reader :virus
-  attr_accessor :fps, :current_level
+  attr_accessor :level, :current_level
 
-  def load_level
-    clear_game
-    Boards[@current_level][:virus].each { |v|
-      @virus << Virus.new(@canvas, v, self)
-      } if Boards[@current_level][:virus]
-
-    Boards[@current_level][:walls].each { |v|
-      @walls << Wall.new(@canvas, v, self)
-      } if Boards[@current_level][:walls]
-  end
-
-  def clear_game
-    @virus.each { |v|
-      v.tentacles.each { |t|
-        t.destroy
-        }
-      v.destroy
-      }
-    @virus.clear
-    @walls.each { |w|
-      w.destroy
-      }
-    @walls.clear
-  end
-
-  #def draw(resize=false)
-  #  return false if destroyed?
-  #  #if resize
-  #  #end
-  #  false
-  #end
-
-  def get_virus(x,y, team)
-    @rv   = nil
-    @dist = 10000
-    @virus.each { |v|
-      d = utils_distance(v.x, v.y, x, y)
-      if d < 30 and d < @dist and (team==:all or v.team == team)
-        @rv = v
-        @dist = d
-      end
-      }
-     @rv
-  end
 
   def initialize()
     super()
     @virus          = []
     @walls          = []
-    @current_level  = 0
+    @current_level  = 3
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)
     set_size_request((@width = 48)+(@pad*2), (@height = 48)+(@pad*2))
     @canvas = Gnome::Canvas.new(true)
     @box.add(@canvas)
-    @fps = Gnome::CanvasText.new(@canvas.root, {
+    @level = Gnome::CanvasText.new(@canvas.root, {
       :x => 20,
-      :y => 5,
+      :y => 10,
       :fill_color=>"white",
       :family=>"Arial",
-      :markup => "FPS"})
+      :markup => "level"})
+    @force = Gnome::CanvasText.new(@canvas.root, {
+      :x => 100,
+      :y => 10,
+      :fill_color=>"white",
+      :family=>"Arial",
+      :markup => "Force"})
     @line = Gnome::CanvasLine.new(@canvas.root,
       :width_pixels => 2.0)
     @line.hide
@@ -117,15 +83,15 @@ class Board < Gtk::VBox
     @box.signal_connect('button-release-event') do |owner, ev|
       end_v = get_virus(ev.x,ev.y, :all)
       if @selection and end_v
-        if not @selection.enough_life?(end_v)
-          @@player.play(:not_enough_life)
-        else
+        #if not @selection.enough_life?(end_v)
+        #  @@player.play(:not_enough_life)
+        #else
           if end_v == @selection
             @@player.play(:error)
           else
             @selection.add_tentacle(end_v)
           end
-        end 
+        #end 
       elsif @cut.x
         cut(@cut.x, @cut.y, ev.x, ev.y)
       end
@@ -142,7 +108,51 @@ class Board < Gtk::VBox
     @box.show()
     show()
     load_level()
+    @time = Time.now
+  end
+  
+  def iterate
+    update_virus
+    play_ennemies
+    sleep(0.01)
+  end
+  
+  def load_level
+    clear_game
+    Boards[@current_level][:virus].each { |v|
+      @virus << Virus.new(@canvas, v, self)
+      } if Boards[@current_level][:virus]
 
+    Boards[@current_level][:walls].each { |v|
+      @walls << Wall.new(@canvas, v, self)
+      } if Boards[@current_level][:walls]
+  end
+
+  def clear_game
+    @virus.each { |v|
+      v.tentacles.each { |t|
+        t.destroy
+        }
+      v.destroy
+      }
+    @virus.clear
+    @walls.each { |w|
+      w.destroy
+      }
+    @walls.clear
+  end
+
+  def get_virus(x,y, team)
+    @rv   = nil
+    @dist = 10000
+    @virus.each { |v|
+      d = utils_distance(v.x, v.y, x, y)
+      if d < 30 and d < @dist and (team==:all or v.team == team)
+        @rv = v
+        @dist = d
+      end
+      }
+     @rv
   end
 
   def start
@@ -169,6 +179,27 @@ class Board < Gtk::VBox
   def check_walls(x1,y1, x2,y2)
     @walls.each { |w| return true if get_intersection(w.x1,w.y1, w.x2,w.y2, x1,y1, x2,y2) }
     return false
+  end
+  
+  def update_virus
+    time = Time.now - @time
+    total = 0
+    mine  = 0.0
+    @virus.each{ |v|
+      v.update(time)
+      total += v.life if v.team != :neutral
+      mine  += v.life if v.team == :green
+      }
+    @force.markup = (mine*100/total).to_i.to_s + "%"
+    @time = Time.now
+  end
+
+  def play_ennemies
+    @virus.each { |v|
+      next if v.team == :neutral or v.team == :green
+      #next if rand(1000) != 0
+      v.play
+      }
   end
 
   # thanks to http://alienryderflex.com/intersect/

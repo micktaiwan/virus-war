@@ -19,7 +19,6 @@ class Player
   def initialize(sounds)
     SDL::init(SDL::INIT_AUDIO)
     SDL::Mixer.open(22050,SDL::Mixer::FORMAT_S16,2,4096)
-    SDL::Mixer.set_volume_music(255)
     @sounds = Hash.new
     sounds.each_pair { |id, file|
       @sounds[id] = SDL::Mixer::Wave.load("sounds/"+file)

@@ -3,7 +3,7 @@ require 'sucker'
 
 class Tentacle
 
-  attr_reader :from, :to, :state, :length, :distance, :sucker_nb, :retract_length, :send_length
+  attr_reader :from, :to, :state, :length, :distance, :sucker_nb, :retract_length, :send_length, :anim_pos
   # DEPLOYING = 'zipper.wav'
 
   def initialize(canvas, from, to)
@@ -14,12 +14,15 @@ class Tentacle
     @state    = :created
     @length   = 0.0
     @distance = 0.0
+    @anim_pos = 0.0
     deploy(to)
   end
 
   def update(time)
     @time = time
     this_length = @time * GrowSpeed
+    @anim_pos += this_length
+    @anim_pos = 0.0 if @anim_pos > @sucker_nb*Sucker::Size
     #puts @state.to_s + ' ' + Time.now.to_s
     case @state
       when :deploying
@@ -84,12 +87,6 @@ class Tentacle
 #    end
   end
 
-  def hide
-    #@line.hide
-    @state = :hidden
-    @length = 0
-  end
-
   def deploy(to)
     @@player.play(:deploying)
     @to       = to
@@ -98,10 +95,6 @@ class Tentacle
     set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     @state    = :deploying
     @to.receive_tentacle(self)
-  end
-
-  def redeploy
-    @state    = :deploying
   end
 
   def duel?
@@ -123,17 +116,11 @@ class Tentacle
     retract
   end
 
-  def hide_all_suckers
-    @suckers.each { |s|
-      s.hide
-      }
-  end
-
-  #def quick_retract
-  #  @state = :hidden
-  #  @length = 0
-  #  update_suckers
-  #end
+#  def hide_all_suckers
+#    @suckers.each { |s|
+#      s.hide
+#      }
+#  end
 
   def cut(point)
     return if @state == :retracting
@@ -156,7 +143,16 @@ class Tentacle
       }
   end
 
+  def redeploy
+    @state    = :deploying
+  end
+
 private
+
+  def hide
+    @state = :hidden
+    @length = 0
+  end
 
   def animate_deploy
     t = @to.find_all(@from)

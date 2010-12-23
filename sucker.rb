@@ -10,8 +10,9 @@ class Sucker
 
   def initialize(canvas, tentacle, pos)
     @canvas, @tentacle, @pos = canvas, tentacle, pos
+    @color = Colors[(@tentacle.from.team.to_s+"deploy").to_sym]
     @ellipse = Gnome::CanvasEllipse.new(@canvas.root, {
-      :fill_color_rgba => Colors[(@tentacle.from.team.to_s+"deploy").to_sym]})
+      :fill_color_rgba => @color})
     @ellipse.lower_to_bottom
     @ellipse.raise(1)
     update
@@ -21,9 +22,7 @@ class Sucker
     # TODO: calculate fixed @x once for all when tentacle is deployed
     @x = @tentacle.from.x + (@tentacle.to.x-@tentacle.from.x)*(@pos*Size / @tentacle.distance)
     @y = @tentacle.from.y + (@tentacle.to.y-@tentacle.from.y)*(@pos*Size / @tentacle.distance)
-    if @x.to_s == "NaN"
-      puts "error, distance = #{@tentacle.distance}"
-    end
+
     # see if cut and if it needs to be hidden
     if @tentacle.state == :cut
       # see if sucker pos is out of two lines
@@ -46,6 +45,7 @@ class Sucker
 
   def set_color(c)
     return if @ellipse.destroyed?
+    @color = c
     @ellipse.fill_color_rgba = c
   end
 
@@ -67,6 +67,11 @@ private
     @ellipse.x2 = @x+Sizeby2 + Math.cos(t+@pos)*SinSize
     @ellipse.y1 = @y-Sizeby2 + Math.sin(t+@pos)*SinSize
     @ellipse.y2 = @y+Sizeby2 + Math.sin(t+@pos)*SinSize
+    if (@pos*Size - @tentacle.anim_pos).abs < Sizeby2
+       @ellipse.fill_color_rgba = 0xDDDD00FF 
+    else
+      @ellipse.fill_color_rgba = @color
+    end
   end
 
 end

@@ -22,16 +22,15 @@ class Viewer < Gtk::Window
   end
 end
 
-Gtk.init()
 
+Gtk.init()
 board = Board.new
 view = Viewer.new(board)
 view.show
-brain = Brain.new(board.virus)
-board.fps.markup = "1"
+board.level.markup = "1"
 loop {
   #t =Time.now
-  brain.iterate
+  board.iterate
 
   # end game
   if board.virus.select{ |v| v.team != :green and v.team != :neutral}.size == 0
@@ -45,7 +44,7 @@ loop {
       puts "You won !"
       board.current_level = 0
     end
-    board.fps.markup = (board.current_level+1).to_s
+    board.level.markup = (board.current_level+1).to_s
     board.load_level
   elsif board.virus.select{ |v| v.team == :green}.size == 0
     @@player.play(:lost)
@@ -53,7 +52,7 @@ loop {
       Gtk.main_iteration
     end
     sleep(3)
-    board.fps.markup = (board.current_level+1).to_s
+    board.level.markup = (board.current_level+1).to_s
     board.load_level
   end
 
@@ -62,7 +61,7 @@ loop {
     Gtk.main_iteration
   end
   break if board.destroyed?
-  #board.fps.markup = ((Time.now - t)*10000).to_i.to_s
+  #board.level.markup = ((Time.now - t)*10000).to_i.to_s
   }
 
 
