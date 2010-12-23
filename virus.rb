@@ -85,7 +85,6 @@ class Virus
         t.retract if @life <= 1
       elsif t.to.team != :neutral
         t.to.remove_life(time*factor(@life, nb), t.from.team)
-        # TODO: if life < 1, first retract tentacles before changing team
       else # neutral
         t.to.contaminate(time*factor(@life, nb), @team)
       end
