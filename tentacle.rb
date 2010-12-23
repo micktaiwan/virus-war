@@ -7,6 +7,7 @@ class Tentacle
   # DEPLOYING = 'zipper.wav'
 
   def initialize(canvas, from, to)
+    raise "tentacle initialize: from == to" if from == to
     @canvas, @from, @to = canvas, from, to
     @suckers = [] # a pool of suckers
     @sucker_nb = 0
@@ -93,6 +94,7 @@ class Tentacle
     @@player.play(:deploying)
     @to       = to
     @distance = utils_distance(@from.x, @from.y, @to.x, @to.y)
+    raise "deploy(to): @distance == 0" if @distance == 0 
     set_color(Colors[(@from.team.to_s+"deploy").to_sym])
     @state    = :deploying
     @to.receive_tentacle(self)

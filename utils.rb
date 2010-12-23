@@ -23,7 +23,8 @@ SOUNDS = {
   :start => 'bulles.wav',
   :cut => 'throw.wav',
   :change => 'axe_throw.wav',
-  :lost => 'lost.wav'
+  :lost => 'lost.wav',
+  :not_enough_life => 'error.wav'
   }
 
 class Point

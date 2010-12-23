@@ -245,9 +245,6 @@ class Virus
       end
     end
 
-    # do nothing else if life is too small
-    return if life <= 5
-
     # attack nearest ennemy with less life
     if occupied_tentacles.size < @max_t
       e = nearest { |v| v.team != :neutral and v.team != @team }
@@ -262,13 +259,13 @@ class Virus
 
   def enough_life?(v, length=:full)
     return false if not v
-    (utils_distance(@x,@y, v.x,v.y)*LengthFactor+1) / (length==:half ? 2 : 1) < @life
+    ((utils_distance(@x,@y, v.x,v.y)*LengthFactor) / (length==:half ? 2 : 1))+1 < @life # +1 as virus are dead if life < 1
   end
 
   def nearest
     rv = nil
     nd = 1000
-    @board.virus.select{|v| block_given? ? (yield v) : true }.each { |v|
+    @board.virus.select{|v| block_given? ? (yield v) : (v==self ? false : true) }.each { |v|
       d = utils_distance(self.x, self.y, v.x, v.y)
       rv = v and nd = d if d < nd
       }

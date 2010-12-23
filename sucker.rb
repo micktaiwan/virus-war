@@ -18,14 +18,11 @@ class Sucker
   end
 
   def update
-    #line = [@tentacle.from.x, @tentacle.from.y, @tentacle.to.x, @tentacle.to.y]
-
     # TODO: calculate fixed @x once for all when tentacle is deployed
     @x = @tentacle.from.x + (@tentacle.to.x-@tentacle.from.x)*(@pos*Size / @tentacle.distance)
     @y = @tentacle.from.y + (@tentacle.to.y-@tentacle.from.y)*(@pos*Size / @tentacle.distance)
     if @x.to_s == "NaN"
-      puts "error"
-      puts "distance = #{@tentacle.distance}"
+      puts "error, distance = #{@tentacle.distance}"
     end
     # see if cut and if it needs to be hidden
     if @tentacle.state == :cut

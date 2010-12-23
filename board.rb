@@ -59,7 +59,7 @@ class Board < Gtk::VBox
     super()
     @virus          = []
     @walls          = []
-    @current_level  = 4
+    @current_level  = 7
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)
@@ -117,7 +117,11 @@ class Board < Gtk::VBox
     @box.signal_connect('button-release-event') do |owner, ev|
       end_v = get_virus(ev.x,ev.y, :all)
       if @selection and end_v
-        @selection.add_tentacle(end_v)
+        if not @selection.enough_life?(end_v)
+          @@player.play(:not_enough_life)
+        else
+          @selection.add_tentacle(end_v)
+        end
       elsif @cut.x
         cut(@cut.x, @cut.y, ev.x, ev.y)
       end
