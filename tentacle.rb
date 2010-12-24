@@ -37,10 +37,7 @@ class Tentacle
       update_suckers
     when :retracting
       @length -= @this_length*RetractFactor
-      if @length <= 0
-        @length  = 0
-        hide
-      end
+      hide if @length <= 0
       @from.add_life(@this_length*RetractFactorxLengthFactor)
       puts "Adding life: #{@this_length*RetractFactorxLengthFactor}, len=#{@length}, retracting" if @from.team == :green
       update_suckers
@@ -157,7 +154,7 @@ class Tentacle
 private
 
   def hide
-    @state = :hidden
+    @state  = :hidden
     @length = 0
   end
 

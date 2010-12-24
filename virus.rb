@@ -188,14 +188,14 @@ class Virus
 
   def find(to) # TODO add a block to filter virus found
     active_tentacles.each { |t|
-      return t if t.from == self and t.to == to
+      return t if t.to == to
       }
     return nil
   end
 
   def find_all(to) # TODO no more needed if added filter with block to "find"
     occupied_tentacles.each { |t|
-      return t if t.from == self and t.to == to
+      return t if t.to == to
       }
     return nil
   end
