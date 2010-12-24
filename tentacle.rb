@@ -53,21 +53,21 @@ class Tentacle
       @length -= @this_length*RetractFactor
       hide if @length <= 0
       @from.add_life(@this_length*RetractFactorxLengthFactor)
-      puts "Adding life: #{@this_length*RetractFactorxLengthFactor}, len=#{@length}, retracting" if @from.team == :green
+      #puts "Adding life: #{@this_length*RetractFactorxLengthFactor}, len=#{@length}, retracting" if @from.team == :green
       update_suckers
     when :cut
       if @retract_length > 0
         @retract_length -= @this_length*CutFactor 
         @retract_length  = 0 if @retract_length <= 0
         @from.add_life(@this_length*CutFactorxLengthFactor)
-        puts "Adding life: #{@this_length*CutFactorxLengthFactor}, len=#{@length}, cutting r" if @from.team == :green
+        #puts "Adding life: #{@this_length*CutFactorxLengthFactor}, len=#{@length}, cutting r" if @from.team == :green
       end
       if @send_length > 0
         @send_length    -= @this_length*CutFactor  
         @send_length     = 0 if @send_length <= 0
         if @to.team == @from.team
           @to.add_life(@this_length*CutFactorxLengthFactor)
-          puts "Adding life: #{@this_length*CutFactorxLengthFactor}, len=#{@length}, cutting s" if @from.team == :green
+          #puts "Adding life: #{@this_length*CutFactorxLengthFactor}, len=#{@length}, cutting s" if @from.team == :green
         elsif @to.team == :neutral
           @to.contaminate(@this_length*CutFactorxLengthFactor, @from.team)
         else # ennemy
@@ -106,7 +106,7 @@ class Tentacle
     @to       = to
     @distance = utils_distance(@from.x, @from.y, @to.x, @to.y)
     raise "deploy(to): @distance == 0" if @distance == 0 
-    set_color(Colors[(@from.team.to_s+"deploy").to_sym])
+    set_color(Colors[(@from.team.to_s+"_deploy").to_sym])
     @state    = :deploying
     @to.receive_tentacle(self)
   end
@@ -122,7 +122,7 @@ class Tentacle
   def retract
     return if state == :retracting
     @to.detach_tentacle(self) if @state == :active
-    set_color(Colors[(@from.team.to_s+"deploy").to_sym])
+    set_color(Colors[(@from.team.to_s+"_deploy").to_sym])
     @state = :retracting
   end
 
@@ -192,7 +192,7 @@ private
       @length -= @this_length
       stop_deploy(dist) if @length <= dist
       @from.add_life(@this_length*LengthFactor)
-      puts "Adding life: #{@this_length*LengthFactor}, len=#{@length}, dist=#{dist}" if @from.team == :green
+      #puts "Adding life: #{@this_length*LengthFactor}, len=#{@length}, dist=#{dist}" if @from.team == :green
     else
       @length += @this_length
       stop_deploy(dist) if @length >= dist

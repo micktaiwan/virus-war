@@ -153,6 +153,7 @@ class Virus
       if @contamination <= 0
         @contamination = -@contamination
         @contaminate_team = team
+        set_contaminate_color(team)
       end
     end
   end
@@ -173,15 +174,11 @@ class Virus
     @tentacles.select { |t| t.state != :hidden}
   end
 
-  #def find_active(to) # TODO add a block to filter virus found
-  #  find_tentacle_if { |t| t.state == :active and t.to==to}
-  #end
-
   def find_all(to)
     find_tentacle_if { |t| t.to==to}
   end
 
-  def find_tentacle_if # TODO add a block to filter virus found
+  def find_tentacle_if
     raise "must have a block" if not block_given?
     occupied_tentacles.each { |t|
       return t if yield t
@@ -194,11 +191,20 @@ class Virus
     @@player.play(:change)
     @team = team
     @life = -@life + @start
-    @ellipse.fill_color_rgba = Colors[team]
-    @border.fill_color_rgba = Colors[("dark_"+@team.to_s).to_sym]
+    set_color(@team)
     @tentacles.each { |t|
       t.change_team(team)
       }
+  end
+
+  def set_color(team)
+    @ellipse.fill_color_rgba = Colors[team]
+    @border.fill_color_rgba = Colors[("dark_"+team.to_s).to_sym]
+  end
+
+  def set_contaminate_color(team)
+    @ellipse.fill_color_rgba = Colors[(team.to_s+"_contaminate").to_sym]
+    @border.fill_color_rgba = Colors[(team.to_s).to_sym]
   end
 
   # make an "intelligent" action
@@ -229,7 +235,7 @@ class Virus
     # attack if attacked
     if ets > 0 and ots < @max_t and ots == ats
       ennemies_tentacles.each { |t|
-        return if enough_life?(t.from, :half) and add_tentacle(t.from) # TODO: does not work
+        return if enough_life?(t.from, :half) and add_tentacle(t.from)
         }
     end
 

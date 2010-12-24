@@ -4,7 +4,7 @@ require 'virus'
 #require 'brain'
 require 'wall'
 require 'utils'
-
+require "button"
 
 # TODO: teams force indicator
 
@@ -19,13 +19,18 @@ class Board < Gtk::VBox
     super()
     @virus          = []
     @walls          = []
-    @current_level  = 1
+    @current_level  = 0
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)
     set_size_request((@width = 48)+(@pad*2), (@height = 48)+(@pad*2))
     @canvas = Gnome::Canvas.new(true)
     @box.add(@canvas)
+    
+    Button.new("images/restart.png", @canvas, 10, 550) {
+      load_level 
+      }
+  
     @level = Gnome::CanvasText.new(@canvas.root, {
       :x => 20,
       :y => 10,
@@ -104,9 +109,9 @@ class Board < Gtk::VBox
     signal_connect_after('show') {|w,e| start() }
     signal_connect_after('hide') {|w,e| stop() }
 
-    @canvas.show()
-    @box.show()
-    show()
+    #@canvas.show()
+    #@box.show()
+    show_all()
     load_level()
     @time = Time.now
   end

@@ -6,9 +6,12 @@ Colors = {
   :dark_green     => 0x007700FF,
   :dark_black     => 0x000000FF,
   :dark_neutral   => 0x444444FF,
-  :reddeploy      => 0xFF8888FF,
-  :greendeploy    => 0x88AA88FF,
-  :blackdeploy    => 0x555555FF,
+  :red_deploy      => 0xFF8888FF,
+  :green_deploy    => 0x88AA88FF,
+  :black_deploy    => 0x555555FF,
+  :red_contaminate      => 0xAA8888FF,
+  :green_contaminate    => 0x88AA88FF,
+  :black_contaminate    => 0x555555FF,
   :neutral        => 0x999999FF
   }
 

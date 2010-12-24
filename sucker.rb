@@ -10,7 +10,7 @@ class Sucker
 
   def initialize(canvas, tentacle, pos)
     @canvas, @tentacle, @pos = canvas, tentacle, pos
-    @color = Colors[(@tentacle.from.team.to_s+"deploy").to_sym]
+    @color = Colors[(@tentacle.from.team.to_s+"_deploy").to_sym]
     @ellipse = Gnome::CanvasEllipse.new(@canvas.root, {
       :fill_color_rgba => @color})
     @ellipse.lower_to_bottom
