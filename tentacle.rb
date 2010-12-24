@@ -20,8 +20,8 @@ class Tentacle
 
   def update(time)
     @time = time
-    this_length = @time * GrowSpeed
-    @anim_pos += this_length
+    @this_length = @time * GrowSpeed
+    @anim_pos += @this_length
     @anim_pos = 0.0 if @anim_pos > @sucker_nb*Sucker::Size
 
     case @state
@@ -29,35 +29,36 @@ class Tentacle
       animate_deploy
       update_suckers
     when :active
-      if @to.find_all(@from)
+      if duel?
         deploy_to_dist(@distance/2)
       else
         @state = :deploying if @length < @distance
       end
       update_suckers
     when :retracting
-      @length -= this_length*RetractFactor
+      @length -= @this_length*RetractFactor
       if @length <= 0
         @length  = 0
         hide
       end
-      @from.add_life(this_length*RetractFactorxLengthFactor)
+      @from.add_life(@this_length*RetractFactorxLengthFactor)
+      puts "Adding life: #{@this_length*RetractFactorxLengthFactor}, len=#{@length}, retracting"
       update_suckers
     when :cut
       if @retract_length > 0
-        @retract_length -= this_length*CutFactor 
+        @retract_length -= @this_length*CutFactor 
         @retract_length  = 0 if @retract_length <= 0
-        @from.add_life(this_length*CutFactorxLengthFactor)
+        @from.add_life(@this_length*CutFactorxLengthFactor)
       end
       if @send_length > 0
-        @send_length    -= this_length*CutFactor  
+        @send_length    -= @this_length*CutFactor  
         @send_length     = 0 if @send_length <= 0
         if @to.team == @from.team
-          @to.add_life(this_length*CutFactorxLengthFactor)
+          @to.add_life(@this_length*CutFactorxLengthFactor)
         elsif @to.team == :neutral
-          @to.contaminate(this_length*CutFactorxLengthFactor, @from.team)
+          @to.contaminate(@this_length*CutFactorxLengthFactor, @from.team)
         else # ennemy
-          @to.remove_life(this_length*CutFactorxLengthFactor, @from.team)
+          @to.remove_life(@this_length*CutFactorxLengthFactor, @from.team)
         end       
       end
       update_suckers
@@ -174,17 +175,15 @@ private
 
   def deploy_to_dist(dist)
     return if @length == dist
-    #@state = :deploying
-    #set_color(Colors[(@from.team.to_s+"deploy").to_sym])
-    this_length = @time * GrowSpeed
     if @length > dist
-      @length -= this_length
+      @length -= @this_length
       stop_deploy(dist) if @length <= dist
-      @from.add_life(this_length*LengthFactor)
+      @from.add_life(@this_length*LengthFactor)
+      puts "Adding life: #{@this_length*LengthFactor}, len=#{@length}, dist=#{dist}"
     else
-      @length += this_length
+      @length += @this_length
       stop_deploy(dist) if @length >= dist
-      @from.remove_life(this_length*LengthFactor, @from.team)
+      @from.remove_life(@this_length*LengthFactor, @from.team)
       retract if @from.life <= 1
     end
   end
