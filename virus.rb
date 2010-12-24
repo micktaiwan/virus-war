@@ -3,7 +3,7 @@ require 'tentacle'
 class Virus
 
   attr_accessor :x, :y, :team, :start, :tentacles
-  attr_reader :life, :max, :max_t, :ellipse, :lifetext
+  attr_reader :life, :max, :max_t, :ellipse, :lifetext, :contamination
 
   BorderSize = 3
 
@@ -35,6 +35,7 @@ class Virus
       :fill_color=>"white",
       :family=>"Arial",
       :markup => @life.to_s})
+    # TODO: nb of tentacles display  
     @border.raise_to_top
     @ellipse.raise_to_top
     @lifetext.raise_to_top
@@ -73,13 +74,13 @@ class Virus
   end
 
   def retract_to_survive
-    rv = false
     occupied_tentacles.each { |t|
       next if t.state == :retracting
+      next if t.duel?
       t.retract
-      rv = true
+      return true
       }
-    rv  
+    return false
   end
 
   def update_life(time)
@@ -214,6 +215,11 @@ class Virus
   # make an "intelligent" action
   def play
 
+    # if deploying, do nothing else
+    occupied_tentacles.each { |t|
+      return if t.state == :deploying
+      }
+    
     ots = occupied_tentacles.size
     ets = ennemies_tentacles.size
     ats = active_tentacles.size
@@ -226,9 +232,9 @@ class Virus
     end
 
     # retract tentacle if not attacked and life is inferior
-    active_tentacles.each { |t|
-      t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+10 < t.to.life
-      }
+    #active_tentacles.each { |t|
+    #  t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+10 < t.to.life
+    #  }
 
     # remove useless tentacles: to same team not attacked with more life (attention to rule below when connecting friends with less life)
     occupied_tentacles.each { |t|
@@ -292,6 +298,10 @@ class Virus
     else
       @size_factor = 20 + @start/5
     end
+  end
+
+  def tentacles_life
+    occupied_tentacles.inject(0) { |sum, t| sum += t.life}
   end
 
   def destroy

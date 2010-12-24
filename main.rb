@@ -4,6 +4,8 @@
 # See Sounds instructions in player.rb
 
 # Search todos: grep -r TODO *
+# TODO: level selector
+# TODO: replay button
 
 require 'board'
 require 'utils'

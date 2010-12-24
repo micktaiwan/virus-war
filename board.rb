@@ -19,7 +19,7 @@ class Board < Gtk::VBox
     super()
     @virus          = []
     @walls          = []
-    @current_level  = 2
+    @current_level  = 9
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)
@@ -183,12 +183,11 @@ class Board < Gtk::VBox
   
   def update_virus
     time = Time.now - @time
-    total = 0
-    mine  = 0.0
+    total, mine = 0, 0
     @virus.each{ |v|
       v.update(time)
-      total += v.life if v.team != :neutral
-      mine  += v.life if v.team == :green
+      total += v.life + v.tentacles_life if v.team != :neutral
+      mine  += v.life + v.tentacles_life if v.team == :green
       }
     @force.markup = (mine*100/total).to_i.to_s + "%"
     @time = Time.now

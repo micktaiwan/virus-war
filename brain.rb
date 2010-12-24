@@ -1,10 +1,10 @@
+# TODO: Brain
 class Brain
 
-  def initialize(all_virus)
-    @virus = all_virus
-    @time = Time.now
+  def initialize(board)
+    @board = board
+    @virus = @board.virus
   end
-
 
 end
 

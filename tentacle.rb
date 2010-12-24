@@ -146,6 +146,10 @@ class Tentacle
   def redeploy
     @state    = :deploying
   end
+  
+  def life
+    @length * LengthFactor
+  end
 
 private
 
