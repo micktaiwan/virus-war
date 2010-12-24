@@ -42,19 +42,21 @@ class Tentacle
         hide
       end
       @from.add_life(@this_length*RetractFactorxLengthFactor)
-      puts "Adding life: #{@this_length*RetractFactorxLengthFactor}, len=#{@length}, retracting"
+      puts "Adding life: #{@this_length*RetractFactorxLengthFactor}, len=#{@length}, retracting" if @from.team == :green
       update_suckers
     when :cut
       if @retract_length > 0
         @retract_length -= @this_length*CutFactor 
         @retract_length  = 0 if @retract_length <= 0
         @from.add_life(@this_length*CutFactorxLengthFactor)
+        puts "Adding life: #{@this_length*CutFactorxLengthFactor}, len=#{@length}, cutting r" if @from.team == :green
       end
       if @send_length > 0
         @send_length    -= @this_length*CutFactor  
         @send_length     = 0 if @send_length <= 0
         if @to.team == @from.team
           @to.add_life(@this_length*CutFactorxLengthFactor)
+          puts "Adding life: #{@this_length*CutFactorxLengthFactor}, len=#{@length}, cutting s" if @from.team == :green
         elsif @to.team == :neutral
           @to.contaminate(@this_length*CutFactorxLengthFactor, @from.team)
         else # ennemy
@@ -179,7 +181,7 @@ private
       @length -= @this_length
       stop_deploy(dist) if @length <= dist
       @from.add_life(@this_length*LengthFactor)
-      puts "Adding life: #{@this_length*LengthFactor}, len=#{@length}, dist=#{dist}"
+      puts "Adding life: #{@this_length*LengthFactor}, len=#{@length}, dist=#{dist}" if @from.team == :green
     else
       @length += @this_length
       stop_deploy(dist) if @length >= dist
