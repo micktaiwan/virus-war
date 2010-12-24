@@ -18,10 +18,15 @@ class Tentacle
     deploy(to)
   end
 
+  def factor
+    1 + (@from.life/@nb)/25
+  end
+
   def update(time)
     @time = time
+    @nb = @from.active_tentacles.size
     @this_length = @time * GrowSpeed
-    @anim_pos += @this_length
+    @anim_pos += @this_length*factor/2
     @anim_pos = 0.0 if @anim_pos > @sucker_nb*Sucker::Size
 
     case @state
@@ -29,10 +34,18 @@ class Tentacle
       animate_deploy
       update_suckers
     when :active
+      if @to.team == @from.team
+        @to.add_life(time*factor)
+        retract if @from.life <= 1
+      elsif @to.team != :neutral
+        @to.remove_life(time*factor, @from.team)
+      else # neutral
+        @to.contaminate(time*factor, @from.team)
+      end
       if duel?
         deploy_to_dist(@distance/2)
-      else
-        @state = :deploying if @length < @distance
+      elsif @length < @distance
+        @state = :deploying 
       end
       update_suckers
     when :retracting
@@ -102,7 +115,7 @@ class Tentacle
   end
 
   def duel
-    @to.find(@from)
+    @to.find_all(@from)
   end
 
   def retract
@@ -159,7 +172,7 @@ private
   end
 
   def animate_deploy
-    t = @to.find_all(@from)
+    t = duel
     if t
       if t.length > @distance / 2
         dist = @distance/2

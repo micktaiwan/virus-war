@@ -56,7 +56,3 @@ def utils_distance(a,b,x,y)
   end  
 end
 
-def factor(life,tentacle_nb)
-  1 + (life/tentacle_nb)/25
-end
-

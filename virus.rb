@@ -83,22 +83,9 @@ class Virus
     return false
   end
 
+  # maybe put this in tentacles ?
   def update_life(time)
-    # time life
     add_life(time*TimeFactor) if @team != :neutral
-
-    # tentacles life
-    nb = active_tentacles.size
-    active_tentacles.each { |t|
-      if t.to.team == @team
-        t.to.add_life(time*factor(@life,nb))
-        t.retract if @life <= 1
-      elsif t.to.team != :neutral
-        t.to.remove_life(time*factor(@life, nb), t.from.team)
-      else # neutral
-        t.to.contaminate(time*factor(@life, nb), @team)
-      end
-      }
   end
 
   def add_tentacle(destination_virus)
@@ -200,6 +187,14 @@ class Virus
     return nil
   end
 
+  def find_tentacle_if # TODO add a block to filter virus found
+    raise "must have a block" if not block_given?
+    occupied_tentacles.each { |t|
+      return t if yield t
+      }
+    return nil
+  end
+
 
   def change_team(team)
     @@player.play(:change)
@@ -215,37 +210,32 @@ class Virus
   # make an "intelligent" action
   def play
 
+    # TODO: for all loops below, precalculate all the sums, instead of looping them
+
     # if deploying, do nothing else
-    occupied_tentacles.each { |t|
-      return if t.state == :deploying
-      }
+    @tentacles.each { |t| return if t.state==:deploying }
     
     ots = occupied_tentacles.size
     ets = ennemies_tentacles.size
     ats = active_tentacles.size
     
-    # attack if attacked
-    if ets > 0 and ots < @max_t and ots == ats
-      ennemies_tentacles.each { |t|
-        return if enough_life?(t.from, :half) and add_tentacle(t.from)
-        }
-    end
-
-    # retract tentacle if not attacked and life is inferior
-    #active_tentacles.each { |t|
-    #  t.retract if t.to.team !=:neutral and t.to.team != @team and !t.to.find(self) and @life+10 < t.to.life
-    #  }
-
     # remove useless tentacles: to same team not attacked with more life (attention to rule below when connecting friends with less life)
     occupied_tentacles.each { |t|
       next if t.state == :retracting
-      t.retract if t.to.team == @team and t.to.life > @life+deploy_cost(t.to) and t.to.ennemies_tentacles.size == 0
+      t.retract if t.to.team == @team and t.to.life+t.to.tentacles_life > @life+tentacles_life+deploy_cost(t.to) and t.to.ennemies_tentacles.size == 0
       }
 
     # remove useless tentacles: from neutral when attacked
-    if ennemies_tentacles.size > 0  and occupied_tentacles.size >= @max_t
+    if ennemies_tentacles.size > 0  and occupied_tentacles.size >= 0
       ennemies_tentacles.each { |t|
-        t.retract if t.to.team == :neutral
+          return if not t.duel? and remove_neutral 
+        }
+    end
+
+    # attack if attacked
+    if ets > 0 and ots < @max_t and ots == ats
+      ennemies_tentacles.each { |t|
+        return if enough_life?(t.from, :half) and add_tentacle(t.from) # TODO: does not work
         }
     end
 
@@ -255,19 +245,28 @@ class Virus
       return if n and enough_life?(n) and add_tentacle(n)
     end
 
-    # attack nearest ennemy with less life
+    # attack nearest ennemy #with less life
     if ots < @max_t
-      e = nearest { |v| v.team != @team and v.team != :neutral }
-      return if e and e.life < @life and enough_life?(e) and add_tentacle(e)
-      # TODO: take in account the tentacles life
+      e = nearest { |v| v.team != @team and v.team != :neutral and # and v.life+v.tentacles_life < (@life+tentacles_life-deploy_cost(v))-1}
+        @life-deploy_cost(v)>1 }
+      return if e and add_tentacle(e)
     end
 
     # recharge friends
-    if ots < @max_t and @tentacles.select { |t| t.state==:deploying }.size == 0 # if deploying then life is less than displayed
-      e = nearest { |v| v.team == @team and v != self }
-      return if e and e.life < (@life-deploy_cost(e))-1 and add_tentacle(e)
+    if ots < @max_t
+      e = nearest { |v| v.team == @team and v != self and v.life+v.tentacles_life < (@life+tentacles_life-deploy_cost(v))-1 }
+      return if e and add_tentacle(e)
     end
     
+  end
+
+  def remove_neutral
+    t = find_tentacle_if {|t| t.to.team == :neutral}
+    if t
+      t.retract
+      return true
+    end
+    return false  
   end
 
   def deploy_cost(v)
