@@ -19,6 +19,7 @@ class Tentacle
   end
 
   def factor
+    return 1 if @nb==0
     1 + (@from.life/@nb)/25
   end
 

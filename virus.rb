@@ -173,18 +173,12 @@ class Virus
     @tentacles.select { |t| t.state != :hidden}
   end
 
-  def find(to) # TODO add a block to filter virus found
-    active_tentacles.each { |t|
-      return t if t.to == to
-      }
-    return nil
-  end
+  #def find_active(to) # TODO add a block to filter virus found
+  #  find_tentacle_if { |t| t.state == :active and t.to==to}
+  #end
 
-  def find_all(to) # TODO no more needed if added filter with block to "find"
-    occupied_tentacles.each { |t|
-      return t if t.to == to
-      }
-    return nil
+  def find_all(to)
+    find_tentacle_if { |t| t.to==to}
   end
 
   def find_tentacle_if # TODO add a block to filter virus found
@@ -228,7 +222,7 @@ class Virus
     # remove useless tentacles: from neutral when attacked
     if ennemies_tentacles.size > 0  and occupied_tentacles.size >= 0
       ennemies_tentacles.each { |t|
-          return if not t.duel? and remove_neutral 
+        return if not t.duel? and remove_neutral 
         }
     end
 
@@ -254,7 +248,8 @@ class Virus
 
     # recharge friends
     if ots < @max_t
-      e = nearest { |v| v.team == @team and v != self and v.life+v.tentacles_life < (@life+tentacles_life-deploy_cost(v))-1 }
+      e = nearest { |v| v.team == @team and v != self and not find_all(v) and v.life < (@life-deploy_cost(v))-1 }
+      puts e.life if e
       return if e and add_tentacle(e)
     end
     
