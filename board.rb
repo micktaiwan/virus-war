@@ -19,7 +19,7 @@ class Board < Gtk::VBox
     super()
     @virus          = []
     @walls          = []
-    @current_level  = 13
+    @current_level  = 0
     @box = Gtk::EventBox.new
     pack_start(@box)
     set_border_width(@pad = 0)
@@ -91,11 +91,7 @@ class Board < Gtk::VBox
         #if not @selection.enough_life?(end_v)
         #  @@player.play(:not_enough_life)
         #else
-          if end_v == @selection
-            @@player.play(:error)
-          else
-            @selection.add_tentacle(end_v)
-          end
+        @selection.add_tentacle(end_v) if end_v != @selection
         #end 
       elsif @cut.x
         cut(@cut.x, @cut.y, ev.x, ev.y)

@@ -5,7 +5,7 @@ class Sucker
 
   Size      = 12
   Sizeby2   = Size/2
-  SinSize   = 1
+  SinSize   = 2
   SinSpeed  = 4
 
   def initialize(canvas, tentacle, pos)

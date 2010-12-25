@@ -27,14 +27,14 @@ class Tentacle
     @time = time
     @nb = @from.active_tentacles.size
     @this_length = @time * GrowSpeed
-    @anim_pos += @this_length*factor/2
-    @anim_pos = 0.0 if @anim_pos > @sucker_nb*Sucker::Size
 
     case @state
     when :deploying
       animate_deploy
       update_suckers
     when :active
+      @anim_pos += @this_length*factor/2
+      @anim_pos = 0.0 if @anim_pos > @sucker_nb*Sucker::Size
       if @to.team == @from.team
         @to.add_life(time*factor)
         retract if @from.life <= 1
