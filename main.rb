@@ -28,7 +28,7 @@ Gtk.init()
 board = Board.new
 view = Viewer.new(board)
 view.show
-board.level.markup = "1"
+board.level.markup = (board.current_level+1).to_s
 loop {
   #t =Time.now
   board.iterate

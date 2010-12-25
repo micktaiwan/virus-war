@@ -5,7 +5,9 @@ class Virus
   attr_accessor :x, :y, :team, :start, :tentacles
   attr_reader :life, :max, :max_t, :ellipse, :lifetext, :contamination
 
-  BorderSize = 3
+  BorderSize      = 3
+  NbTDisplaySize  = 6
+  NbTDisplaySizeBy2 = NbTDisplaySize / 2
 
   def initialize(canvas, h, board)
     @board = board
@@ -23,6 +25,7 @@ class Virus
     end
     @max    = h[:max]
     @max_t  = h[:max_t]
+    @nb_t_displays = []  
     @tentacles    = []
     @receiving_tentacles = []
     @border = Gnome::CanvasEllipse.new(@canvas.root, {
@@ -31,7 +34,7 @@ class Virus
       :fill_color_rgba => Colors[@team]})
     @lifetext = Gnome::CanvasText.new(@canvas.root, {
       :x => @x,
-      :y => @y,
+      :y => @y-5,
       :fill_color=>"white",
       :family=>"Arial",
       :markup => @life.to_s})
@@ -39,8 +42,47 @@ class Virus
     @border.raise_to_top
     @ellipse.raise_to_top
     @lifetext.raise_to_top
+    set_nb_tentacles
     @size_factor = 20
     update(0)
+  end
+  
+  def set_nb_tentacles
+    old, @nb_t = @nb_t, nb_tentacles
+    update_nb_t_display if old != @nb_t and @team != :neutral
+  end
+
+  def nb_tentacles
+    rv = 0
+    if @life >= 15
+      rv = 2
+    elsif @life >= 100
+      rv = 3
+    else
+      rv = 1
+    end  
+    rv = @max_t if rv > @max_t
+    rv
+  end
+  
+  def update_nb_t_display
+    if @nb_t > @nb_t_displays.size
+      (0..@nb_t-1).each {
+        @nb_t_displays << (n = Gnome::CanvasEllipse.new(@canvas.root, {
+        :fill_color => "white"}))
+        n.raise_to_top
+        }
+    end
+    (0..@nb_t-1).each { |i|
+      @nb_t_displays[i].show
+      @nb_t_displays[i].x1 = @x-NbTDisplaySizeBy2       - i*NbTDisplaySize*1.5 + (@nb_t-1)*NbTDisplaySizeBy2*1.5
+      @nb_t_displays[i].y1 = @y-NbTDisplaySizeBy2 + 12
+      @nb_t_displays[i].x2 = @x+NbTDisplaySizeBy2       - i*NbTDisplaySize*1.5 + (@nb_t-1)*NbTDisplaySizeBy2*1.5
+      @nb_t_displays[i].y2 = @y+NbTDisplaySizeBy2 + 12  
+      }
+    (@nb_t..@nb_t_displays.size-1).each { |i|
+      @nb_t_displays[i].hide
+      }
   end
 
   def update(time)
@@ -98,9 +140,9 @@ class Virus
     return false if find_all(destination_virus)
 
     # check if available tentacles
-    return false if occupied_tentacles.size >= @max_t
+    return false if occupied_tentacles.size >= @nb_t
     
-    if @tentacles.size >= @max_t
+    if @tentacles.size >= @nb_t
       find_next_hidden.deploy(destination_virus)
     else
       @tentacles << Tentacle.new(@canvas, self, destination_virus)
@@ -139,6 +181,7 @@ class Virus
   def add_life(l)
     @life += l
     @life = @max if @life > @max
+    set_nb_tentacles
     yield self if block_given?
   end
 
@@ -147,6 +190,8 @@ class Virus
       @contamination += l
       if @contamination >= @start
         change_team(team)
+        @nb_t = 0
+        set_nb_tentacles
       end
     else
       @contamination -= l
@@ -163,6 +208,7 @@ class Virus
     if @life < 1 and not retract_to_survive
       change_team(team)
     end
+    set_nb_tentacles
     #yield self if block_given?
   end
 
@@ -233,29 +279,28 @@ class Virus
     end
 
     # attack if attacked
-    if ets > 0 and ots < @max_t and ots == ats
+    if ets > 0 and ots < @nb_t and ots == ats
       ennemies_tentacles.each { |t|
         return if enough_life?(t.from, :half) and add_tentacle(t.from)
         }
     end
 
     # attack neutral
-    if ots < @max_t
+    if ots < @nb_t
       n = nearest { |v| v.team == :neutral }
       return if n and enough_life?(n) and add_tentacle(n)
     end
 
     # attack nearest ennemy #with less life
-    if ots < @max_t
+    if ots < @nb_t
       e = nearest { |v| v.team != @team and v.team != :neutral and # and v.life+v.tentacles_life < (@life+tentacles_life-deploy_cost(v))-1}
         @life-deploy_cost(v)>1 }
       return if e and add_tentacle(e)
     end
 
     # recharge friends
-    if ots < @max_t
+    if ots < @nb_t
       e = nearest { |v| v.team == @team and v != self and not find_all(v) and v.life < (@life-deploy_cost(v))-1 }
-      puts e.life if e
       return if e and add_tentacle(e)
     end
     
@@ -308,6 +353,9 @@ class Virus
     @ellipse.destroy
     @border.destroy
     @lifetext.destroy
+    @nb_t_displays.each { |ellipse|
+      ellipse.destroy
+      }
   end
 
 end

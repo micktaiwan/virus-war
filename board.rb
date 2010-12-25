@@ -33,13 +33,13 @@ class Board < Gtk::VBox
   
     @level = Gnome::CanvasText.new(@canvas.root, {
       :x => 20,
-      :y => 10,
+      :y => 20,
       :fill_color=>"white",
       :family=>"Arial",
       :markup => "level"})
     @force = Gnome::CanvasText.new(@canvas.root, {
       :x => 100,
-      :y => 10,
+      :y => 20,
       :fill_color=>"white",
       :family=>"Arial",
       :markup => "Force"})

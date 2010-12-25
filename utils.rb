@@ -51,11 +51,6 @@ class Point
 end
 
 def utils_distance(a,b,x,y)
-  begin
     Math.sqrt( (((x-a)*(x-a)) + ((y-b)*(y-b))).abs )
-  rescue
-    puts  (((x-a)*(x-a)) + ((y-b)*(y-b))).abs
-    puts "#{a}, #{b}, #{x}, #{y}"
-  end  
 end
 
