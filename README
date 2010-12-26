@@ -2,21 +2,37 @@ Virus War
 =========
 
 A ripoff of tentacle wars
-http://www.kongregate.com/games/gamezhero/tentacle-wars 
+http://www.kongregate.com/games/gamezhero/tentacle-wars
 
 
-Need Ruby, Ruby Gnome2, ruby SDL
+Need Ruby 1.8.7, Ruby Gnome2, ruby SDL
+
+
+Linux:
+======
+
+sudo apt-get install ruby (1.8.7)
+test with "ruby -v"
 
 sudo apt-get install ruby-gnome2
 sudo apt-get install libsdl1.2-dev
 sudo apt-get install libsdl-mixer1.2-dev
 sudo gem install rubysdl
 
-Windows RubySDL:
+
+Windows
+=======
+
+Install Ruby 1.8.7
+http://rubyinstaller.org/
+
+Then RubySDL:
 Read:  http://www.kmc.gr.jp/~ohai/rubysdl_download.en.html
 1) Download rubysdl-win32-bin on rubyforge (http://rubyforge.org/frs/?group_id=1006)
 2) go to the directory and type ruby install_rubysdl.rb
 
 
-Then run 
+========================
+Then run
 ruby main.rb
+
