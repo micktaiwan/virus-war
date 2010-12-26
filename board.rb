@@ -36,16 +36,20 @@ class Board < Gtk::VBox
     Button.new("images/next.png", @canvas, 180, 520) {
       start_next_level
       }
+
+    Button.new("images/star.png",  @canvas, 0, 0)
+    Button.new("images/heart.png", @canvas, 70, 0)
+
   
     @level = Gnome::CanvasText.new(@canvas.root, {
-      :x => 20,
-      :y => 20,
+      :x => 33,
+      :y => 30,
       :fill_color=>"white",
       :family=>"Arial",
       :markup => "level"})
     @force = Gnome::CanvasText.new(@canvas.root, {
-      :x => 100,
-      :y => 20,
+      :x => 102,
+      :y => 30,
       :fill_color=>"white",
       :family=>"Arial",
       :markup => "Force"})
@@ -53,17 +57,23 @@ class Board < Gtk::VBox
       :width_pixels => 2.0)
     @line.hide
     @cut = Point.new
+    #pixbuf  = Gdk::Pixbuf.new("images/bg.png")
+    #image   = Gtk::Image.new(pixbuf)
+    #@canvas.put(image,0,0)
+    #image.show
+    @box.set_visible_window(@canvas)
 
     @box.signal_connect('size-allocate') { |w,e,*b|
       @width, @height = [e.width,e.height].collect{|i|i - (@pad*2)}
       @canvas.set_size(@width,@height)
       @canvas.set_scroll_region(0,0,@width,@height)
+      @bg.destroy if @bg
       @bg = Gnome::CanvasRect.new(@canvas.root, {
         :x1 => 0,
         :y1 => 0,
         :x2 => @width,
         :y2 => @height,
-        :fill_color_rgba => 0x333333FF})
+        :fill_color_rgba => 0x555555FF})
       @bg.lower_to_bottom
       false
       }

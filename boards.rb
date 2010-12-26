@@ -46,20 +46,23 @@ Boards = [
   },
   {
   :virus => [
-    {:x=>550,  :y=>550,  :team=>:red,     :start=>40, :max=>200, :max_t=>3},
-    {:x=>140,  :y=>60,   :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>70,   :y=>140,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>100,  :y=>400,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>50,   :y=>450,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>150,  :y=>350,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>200,  :y=>300,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>250,  :y=>250,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>300,  :y=>200,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>350,  :y=>150,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>400,  :y=>100,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>450,  :y=>50,   :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
-    {:x=>550,  :y=>450,  :team=>:neutral, :start=>10, :max=>200, :max_t=>3},
-    {:x=>50,   :y=>50,   :team=>:green,   :start=>30, :max=>150, :max_t=>3}
+    {:x=>450,  :y=>550,  :team=>:red,     :start=>40, :max=>200, :max_t=>3},
+    {:x=>530,  :y=>450,  :team=>:neutral, :start=>10, :max=>200, :max_t=>3},
+
+    {:x=>180,  :y=>60,   :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>80,   :y=>190,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+
+    {:x=>150,  :y=>400,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>100,   :y=>450,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>200,  :y=>350,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>250,  :y=>300,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>300,  :y=>250,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>350,  :y=>200,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>400,  :y=>150,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>450,  :y=>100,  :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+    {:x=>500,  :y=>50,   :team=>:neutral, :start=>10, :max=>100, :max_t=>3},
+
+    {:x=>100,   :y=>100,   :team=>:green,   :start=>30, :max=>150, :max_t=>3}
     ],
   },
  {
