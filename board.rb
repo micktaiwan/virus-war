@@ -27,13 +27,13 @@ class Board < Gtk::VBox
     @canvas = Gnome::Canvas.new(true)
     @box.add(@canvas)
     
-    Button.new("images/previous.png", @canvas, 10, 520) {
+    Button.new("images/previous.png", @canvas, 10, 530) {
       start_previous_level
       }
-    Button.new("images/restart.png", @canvas, 90, 520) {
+    Button.new("images/restart.png", @canvas, 80, 530) {
       load_level 
       }
-    Button.new("images/next.png", @canvas, 180, 520) {
+    Button.new("images/next.png", @canvas, 150, 530) {
       start_next_level
       }
 
@@ -53,6 +53,7 @@ class Board < Gtk::VBox
       :fill_color=>"white",
       :family=>"Arial",
       :markup => "Force"})
+    @force.raise_to_top
     @line = Gnome::CanvasLine.new(@canvas.root,
       :width_pixels => 2.0)
     @line.hide
@@ -73,7 +74,7 @@ class Board < Gtk::VBox
         :y1 => 0,
         :x2 => @width,
         :y2 => @height,
-        :fill_color_rgba => 0x555555FF})
+        :fill_color_rgba => 0x444444FF})
       @bg.lower_to_bottom
       false
       }

@@ -35,6 +35,9 @@ loop {
 
   # end game
   if board.virus.select{ |v| v.team != :green and v.team != :neutral}.size == 0
+    while (Gtk.events_pending?)
+      Gtk.main_iteration
+    end
     sleep(1)
     board.start_next_level
   elsif board.virus.select{ |v| v.team == :green}.size == 0
