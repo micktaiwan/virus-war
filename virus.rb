@@ -46,7 +46,7 @@ class Virus
     @size_factor = 20
     update(0)
   end
-  
+
   def set_nb_tentacles
     old, @nb_t = @nb_t, nb_tentacles
     update_nb_t_display if old != @nb_t and @team != :neutral
@@ -118,7 +118,6 @@ class Virus
   def retract_to_survive
     occupied_tentacles.each { |t|
       next if t.state == :retracting
-      next if t.duel?
       t.retract
       return true
       }
@@ -205,9 +204,7 @@ class Virus
 
   def remove_life(l, team)
     @life -= l
-    if @life < 1 and not retract_to_survive
-      change_team(team)
-    end
+    change_team(team) if @life < 1 and not retract_to_survive
     set_nb_tentacles
     #yield self if block_given?
   end
@@ -287,16 +284,15 @@ class Virus
 
     # attack neutral
     if ots < @nb_t
-      n = nearest { |v| v.team == :neutral }
+      n = nearest { |v| v.team == :neutral and enough_life?(v)}
       return if n and enough_life?(n) and add_tentacle(n)
     end
 
-    # attack nearest ennemy #with less life
+    # attack nearest ennemy
     if ots < @nb_t
-      e = nearest { |v| v.team != @team and v.team != :neutral and # and v.life+v.tentacles_life < (@life+tentacles_life-deploy_cost(v))-1}
-        @life-deploy_cost(v)>1 }
+      e = nearest { |v| v.team != @team and v.team != :neutral and enough_life?(v) }
       return if e and add_tentacle(e)
-    end
+    end 
 
     # recharge friends
     if ots < @nb_t

@@ -29,8 +29,7 @@ class Player
     raise "Sound '#{id}' does not exists" if @sounds[id] == nil
     begin
       SDL::Mixer.play_channel(-1,@sounds[id],0)
-    rescue Exception => e
-      puts e.message
+    rescue # in case of too many sounds played and no more free channel
     end
   end
 

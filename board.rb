@@ -27,8 +27,14 @@ class Board < Gtk::VBox
     @canvas = Gnome::Canvas.new(true)
     @box.add(@canvas)
     
-    Button.new("images/restart.png", @canvas, 10, 550) {
+    Button.new("images/previous.png", @canvas, 10, 520) {
+      start_previous_level
+      }
+    Button.new("images/restart.png", @canvas, 90, 520) {
       load_level 
+      }
+    Button.new("images/next.png", @canvas, 180, 520) {
+      start_next_level
       }
   
     @level = Gnome::CanvasText.new(@canvas.root, {
@@ -118,12 +124,29 @@ class Board < Gtk::VBox
     sleep(0.01)
   end
   
+  def start_next_level
+    @current_level += 1
+    @current_level = 0 if Boards.size <= @current_level
+    start_current_level
+  end
+
+  def start_previous_level
+    @current_level -= 1
+    @current_level = Boards.size-1 if @current_level < 0
+    start_current_level
+  end
+
+  def start_current_level
+    level.markup = (@current_level+1).to_s
+    load_level
+  end
+
+
   def load_level
     clear_game
     Boards[@current_level][:virus].each { |v|
       @virus << Virus.new(@canvas, v, self)
       } if Boards[@current_level][:virus]
-
     Boards[@current_level][:walls].each { |v|
       @walls << Wall.new(@canvas, v, self)
       } if Boards[@current_level][:walls]

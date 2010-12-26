@@ -121,13 +121,21 @@ class Tentacle
 
   def retract
     return if state == :retracting
+    # first, give enough life to regain life
+    if @from.life < 1 and @length*LengthFactor > 1-@from.life
+      diff = 1-@from.life
+      @length -= diff*LengthFactor
+      @from.add_life(diff)
+    end
     @to.detach_tentacle(self) if @state == :active
     set_color(Colors[(@from.team.to_s+"_deploy").to_sym])
     @state = :retracting
   end
 
   def change_team(team)
-    retract
+    #@from.remove_life(@length*LengthFactor, team)
+    hide
+    update_suckers
   end
 
 #  def hide_all_suckers

@@ -35,18 +35,8 @@ loop {
 
   # end game
   if board.virus.select{ |v| v.team != :green and v.team != :neutral}.size == 0
-    board.current_level += 1
-    puts "Level #{board.current_level}"
-    while (Gtk.events_pending?)
-      Gtk.main_iteration
-    end
     sleep(1)
-    if Boards.size <= board.current_level
-      puts "You won !"
-      board.current_level = 0
-    end
-    board.level.markup = (board.current_level+1).to_s
-    board.load_level
+    board.start_next_level
   elsif board.virus.select{ |v| v.team == :green}.size == 0
     @@player.play(:lost)
     while (Gtk.events_pending?)
