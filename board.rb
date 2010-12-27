@@ -8,11 +8,21 @@ require "button"
 
 # TODO: teams force indicator
 
+class Viewer < Gtk::Window
+  def initialize(board)
+    super()
+    set_title("Virus Wars")
+    signal_connect("delete_event") { |i,a| board.destroy }
+    set_default_size(600,600)
+    add(board)
+    show()
+  end
+end
 
 class Board < Gtk::VBox
 
-  attr_reader :virus
-  attr_accessor :level, :current_level
+  attr_reader :virus, :score, :level, :current_level
+  #attr_accessor
 
 
   def initialize()
@@ -26,12 +36,12 @@ class Board < Gtk::VBox
     set_size_request((@width = 48)+(@pad*2), (@height = 48)+(@pad*2))
     @canvas = Gnome::Canvas.new(true)
     @box.add(@canvas)
-    
+
     Button.new("images/previous.png", @canvas, 10, 530) {
       start_previous_level
       }
     Button.new("images/restart.png", @canvas, 80, 530) {
-      load_level 
+      load_level
       }
     Button.new("images/next.png", @canvas, 150, 530) {
       start_next_level
@@ -40,7 +50,7 @@ class Board < Gtk::VBox
     Button.new("images/star.png",  @canvas, 0, 0)
     Button.new("images/heart.png", @canvas, 70, 0)
 
-  
+
     @level = Gnome::CanvasText.new(@canvas.root, {
       :x => 33,
       :y => 30,
@@ -53,6 +63,12 @@ class Board < Gtk::VBox
       :fill_color=>"white",
       :family=>"Arial",
       :markup => "Force"})
+    @score_text = Gnome::CanvasText.new(@canvas.root, {
+      :x => 200,
+      :y => 30,
+      :fill_color=>"white",
+      :family=>"Arial",
+      :markup => "Score"})
     @force.raise_to_top
     @line = Gnome::CanvasLine.new(@canvas.root,
       :width_pixels => 2.0)
@@ -109,7 +125,7 @@ class Board < Gtk::VBox
         #  @@player.play(:not_enough_life)
         #else
         @selection.add_tentacle(end_v) if end_v != @selection
-        #end 
+        #end
       elsif @cut.x
         cut(@cut.x, @cut.y, ev.x, ev.y)
       end
@@ -128,30 +144,26 @@ class Board < Gtk::VBox
     load_level()
     @time = Time.now
   end
-  
+
   def iterate
     update_virus
     play_ennemies
-    sleep(0.01)
+    while (Gtk.events_pending?)
+      Gtk.main_iteration
+    end
   end
-  
+
   def start_next_level
     @current_level += 1
     @current_level = 0 if Boards.size <= @current_level
-    start_current_level
+    load_level
   end
 
   def start_previous_level
     @current_level -= 1
     @current_level = Boards.size-1 if @current_level < 0
-    start_current_level
-  end
-
-  def start_current_level
-    level.markup = (@current_level+1).to_s
     load_level
   end
-
 
   def load_level
     clear_game
@@ -161,6 +173,8 @@ class Board < Gtk::VBox
     Boards[@current_level][:walls].each { |v|
       @walls << Wall.new(@canvas, v, self)
       } if Boards[@current_level][:walls]
+    @score = 0.0
+    level.markup = (@current_level+1).to_s
   end
 
   def clear_game
@@ -215,9 +229,10 @@ class Board < Gtk::VBox
     @walls.each { |w| return true if get_intersection(w.x1,w.y1, w.x2,w.y2, x1,y1, x2,y2) }
     return false
   end
-  
+
   def update_virus
     time = Time.now - @time
+    @score += time
     total, mine = 0, 0
     @virus.each{ |v|
       v.update(time)
@@ -225,6 +240,7 @@ class Board < Gtk::VBox
       mine  += v.life + v.tentacles_life if v.team == :green
       }
     @force.markup = (mine*100/total).to_i.to_s + "%"
+    @score_text.markup = @score.to_s[0..4]
     @time = Time.now
   end
 
