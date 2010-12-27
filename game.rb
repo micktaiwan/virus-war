@@ -12,10 +12,15 @@ class Game
     @name = ARGV[0] if ARGV[0]
   end
 
-  def save_score(level, score)
+  def save_score(level, score, computer=nil)
+    if computer
+      name = "Computer (you lost)"
+    else
+      name = @name
+    end
     @scores.transaction do
       @scores[level] = Array.new if not @scores[level]
-      @scores[level] << [@name, score] if not @scores[level].include?([@name, score])
+      @scores[level] << [name, score] if not @scores[level].include?([name, score])
     end
     get_pos_and_print(level, score)
   end

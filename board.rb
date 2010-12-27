@@ -21,7 +21,7 @@ end
 
 class Board < Gtk::VBox
 
-  attr_reader :virus, :score, :level, :current_level
+  attr_reader :virus, :level, :current_level
   #attr_accessor
 
 
@@ -143,6 +143,10 @@ class Board < Gtk::VBox
     show_all()
     load_level()
     @time = Time.now
+  end
+
+  def get_score
+    @score.to_s[0..4].to_f
   end
 
   def iterate

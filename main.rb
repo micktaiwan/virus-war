@@ -29,15 +29,16 @@ loop {
 
   # end game
   if board.virus.select{ |v| v.team != :green and v.team != :neutral}.size == 0
-    pos, scores = game.save_score(board.current_level+1, board.score)
+    pos, scores = game.save_score(board.current_level+1, board.get_score)
     puts "===== LEVEL #{board.current_level+1} ======================"
-    puts "you scored #{board.score}, you are ##{pos}"
+    puts "you scored #{board.get_score}, you are ##{pos}"
     scores.each_with_index { |arr, i|
       puts "#{i+1}) #{arr[0]}: #{arr[1]}"
       }
     sleep(1)
     board.start_next_level
   elsif board.virus.select{ |v| v.team == :green}.size == 0
+    game.save_score(board.current_level+1, board.get_score, :computer)
     @@player.play(:lost)
     sleep(3)
     board.load_level
