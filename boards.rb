@@ -175,6 +175,14 @@ Boards = [
     {:x=>100, :y=>300,  :team=>:green, :start=>15,  :max=>100, :max_t=>3},
     {:x=>300, :y=>300,  :team=>:green, :start=>15,  :max=>100, :max_t=>3}
     ]
+  },
+  {
+  :virus => [
+    {:x=>250, :y=>200,  :team=>:red,    :start=>9,  :max=>30, :max_t=>3},
+    {:x=>350, :y=>200,  :team=>:red,    :start=>9,  :max=>30, :max_t=>3},
+    {:x=>300, :y=>300,  :team=>:green, :start=>15,  :max=>100, :max_t=>3},
+    {:x=>300, :y=>400,  :team=>:green, :start=>6,  :max=>100, :max_t=>3}
+    ]
   }
 ]
 
