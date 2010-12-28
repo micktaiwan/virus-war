@@ -25,7 +25,7 @@ class Virus
     end
     @max    = h[:max]
     @max_t  = h[:max_t]
-    @nb_t_displays = []  
+    @nb_t_displays = []
     @tentacles    = []
     @receiving_tentacles = []
     @border = Gnome::CanvasEllipse.new(@canvas.root, {
@@ -38,7 +38,7 @@ class Virus
       :fill_color=>"white",
       :family=>"Arial",
       :markup => @life.to_s})
-    # TODO: nb of tentacles display  
+    # TODO: nb of tentacles display
     @border.raise_to_top
     @ellipse.raise_to_top
     @lifetext.raise_to_top
@@ -60,11 +60,11 @@ class Virus
       rv = 3
     else
       rv = 1
-    end  
+    end
     rv = @max_t if rv > @max_t
     rv
   end
-  
+
   def update_nb_t_display
     if @nb_t > @nb_t_displays.size
       (0..@nb_t-1).each {
@@ -78,7 +78,7 @@ class Virus
       @nb_t_displays[i].x1 = @x-NbTDisplaySizeBy2       - i*NbTDisplaySize*1.5 + (@nb_t-1)*NbTDisplaySizeBy2*1.5
       @nb_t_displays[i].y1 = @y-NbTDisplaySizeBy2 + 12
       @nb_t_displays[i].x2 = @x+NbTDisplaySizeBy2       - i*NbTDisplaySize*1.5 + (@nb_t-1)*NbTDisplaySizeBy2*1.5
-      @nb_t_displays[i].y2 = @y+NbTDisplaySizeBy2 + 12  
+      @nb_t_displays[i].y2 = @y+NbTDisplaySizeBy2 + 12
       }
     (@nb_t..@nb_t_displays.size-1).each { |i|
       @nb_t_displays[i].hide
@@ -134,13 +134,13 @@ class Virus
 
     # check for walls
     return false if @board.check_walls(@x,@y, destination_virus.x, destination_virus.y)
-    
+
     # check if tentacle already exists
     return false if find_all(destination_virus)
 
     # check if available tentacles
     return false if occupied_tentacles.size >= @nb_t
-    
+
     if @tentacles.size >= @nb_t
       find_next_hidden.deploy(destination_virus)
     else
@@ -148,7 +148,7 @@ class Virus
     end
     # if same team and connected already
     if destination_virus.team == @team and t = destination_virus.find_all(self) and t
-      t.retract 
+      t.retract
     end
     return true
   end
@@ -257,21 +257,21 @@ class Virus
 
     # if deploying, do nothing else
     @tentacles.each { |t| return if t.state==:deploying }
-    
+
     ots = occupied_tentacles.size
     ets = ennemies_tentacles.size
     ats = active_tentacles.size
-    
+
     # remove useless tentacles: to same team not attacked with more life (attention to rule below when connecting friends with less life)
     occupied_tentacles.each { |t|
       next if t.state == :retracting
       t.retract if t.to.team == @team and t.to.life+t.to.tentacles_life > @life+tentacles_life+deploy_cost(t.to) and t.to.ennemies_tentacles.size == 0
       }
 
-    # remove useless tentacles: from neutral when attacked
+    # remove useless tentacles: from neutral or not dueling when attacked
     if ennemies_tentacles.size > 0  and occupied_tentacles.size >= 0
-      ennemies_tentacles.each { |t|
-        return if not t.duel? and remove_neutral 
+      occupied_tentacles.each { |t|
+        return if (remove_neutral or remove_not_dueling)
         }
     end
 
@@ -292,14 +292,14 @@ class Virus
     if ots < @nb_t
       e = nearest { |v| v.team != @team and v.team != :neutral and enough_life?(v) }
       return if e and add_tentacle(e)
-    end 
+    end
 
     # recharge friends
     if ots < @nb_t
       e = nearest { |v| v.team == @team and v != self and not find_all(v) and v.life < (@life-deploy_cost(v))-1 }
       return if e and add_tentacle(e)
     end
-    
+
   end
 
   def remove_neutral
@@ -308,13 +308,22 @@ class Virus
       t.retract
       return true
     end
-    return false  
+    return false
+  end
+
+  def remove_not_dueling
+    t = find_tentacle_if {|t| t.to.team != :neutral and t.to.team!=:green}
+    if t and not t.duel?
+      t.retract
+      return true
+    end
+    return false
   end
 
   def deploy_cost(v)
     utils_distance(@x,@y, v.x,v.y)*LengthFactor
   end
-  
+
   def enough_life?(v, length=:full)
     (deploy_cost(v) / (length==:half ? 1.95 : 1))+1 < @life # +1 as virus are dead if life < 1
   end
