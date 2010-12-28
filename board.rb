@@ -25,7 +25,7 @@ class Board < Gtk::VBox
   #attr_accessor
 
 
-  def initialize()
+  def initialize(is_admin)
     super()
     @virus          = []
     @walls          = []
@@ -49,6 +49,10 @@ class Board < Gtk::VBox
 
     Button.new("images/star.png",  @canvas, 0, 0)
     Button.new("images/heart.png", @canvas, 70, 0)
+
+    Button.new("images/restart.png", @canvas, 300, 0) {
+      delete_current_level_scores
+      } if is_admin
 
 
     @level = Gnome::CanvasText.new(@canvas.root, {
@@ -143,6 +147,10 @@ class Board < Gtk::VBox
     show_all()
     load_level()
     @time = Time.now
+  end
+
+  def delete_current_level_scores
+    Net::HTTP.post_form(URI.parse('http://highscores.protaskm.com/highscores/delete_level_scores'), {'game'=>'virus-war', 'level'=>@current_level+1})
   end
 
   def get_score

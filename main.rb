@@ -7,7 +7,7 @@
 # TODO: level selector
 
 if not ARGV[0]
-  puts 'puts your name after "main.rb", like "main.rb MickTaiwan"'
+  puts 'put your name after "main.rb", like "main.rb MickTaiwan"'
   exit
 end
 
@@ -20,7 +20,7 @@ require 'game'
 
 Gtk.init()
 game  = Game.new
-board = Board.new
+board = Board.new(ARGV[1]=='admin')
 view  = Viewer.new(board)
 view.show
 board.level.markup = (board.current_level+1).to_s
