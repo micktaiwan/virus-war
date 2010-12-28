@@ -13,21 +13,20 @@ class Game
     @name = ARGV[0] if ARGV[0]
   end
 
-  def save_score(level, score, computer=nil)
-    if computer
-      name = "Computer (player lost)"
-    else
-      name = @name
-    end
+  def save_score(level, score)
+    # local
     @scores.transaction do
       @scores[level] = Array.new if not @scores[level]
-      @scores[level] << [name, score] if not @scores[level].include?([name, score])
+      @scores[level] << [@name, score] if not @scores[level].include?([@name, score])
     end
+
+    # on highscores
     begin
-      Net::HTTP.post_form(URI.parse('http://highscores.protaskm.com/highscores/create'), {'game'=>'virus-war', 'level'=>level, 'player'=>name, 'score'=>score})
+      Net::HTTP.post_form(URI.parse('http://highscores.protaskm.com/highscores/create'), {'game'=>'virus-war', 'level'=>level, 'player'=>@name, 'score'=>score})
     rescue Exception => e
-      puts "Could not sve your highscore (e.message)"
+      puts "Could not save your highscore (e.message)"
     end
+
     get_pos_and_print(level, score)
   end
 

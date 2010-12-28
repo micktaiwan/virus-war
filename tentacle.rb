@@ -46,7 +46,12 @@ class Tentacle
       if duel?
         deploy_to_dist(@distance/2)
       elsif @length < @distance
-        @state = :deploying 
+        # if the duel just finished
+        if @from.enough_life?(@to)
+          @state = :deploying
+        else
+          retract
+        end
       end
       update_suckers
     when :retracting
@@ -57,13 +62,13 @@ class Tentacle
       update_suckers
     when :cut
       if @retract_length > 0
-        @retract_length -= @this_length*CutFactor 
+        @retract_length -= @this_length*CutFactor
         @retract_length  = 0 if @retract_length <= 0
         @from.add_life(@this_length*CutFactorxLengthFactor)
         #puts "Adding life: #{@this_length*CutFactorxLengthFactor}, len=#{@length}, cutting r" if @from.team == :green
       end
       if @send_length > 0
-        @send_length    -= @this_length*CutFactor  
+        @send_length    -= @this_length*CutFactor
         @send_length     = 0 if @send_length <= 0
         if @to.team == @from.team
           @to.add_life(@this_length*CutFactorxLengthFactor)
@@ -72,7 +77,7 @@ class Tentacle
           @to.contaminate(@this_length*CutFactorxLengthFactor, @from.team)
         else # ennemy
           @to.remove_life(@this_length*CutFactorxLengthFactor, @from.team)
-        end       
+        end
       end
       update_suckers
       hide if @retract_length == 0 and @send_length == 0
@@ -105,7 +110,7 @@ class Tentacle
     @@player.play(:deploying)
     @to       = to
     @distance = utils_distance(@from.x, @from.y, @to.x, @to.y)
-    raise "deploy(to): @distance == 0" if @distance == 0 
+    raise "deploy(to): @distance == 0" if @distance == 0
     set_color(Colors[(@from.team.to_s+"_deploy").to_sym])
     @state    = :deploying
     @to.receive_tentacle(self)
@@ -168,7 +173,7 @@ class Tentacle
   def redeploy
     @state    = :deploying
   end
-  
+
   def life
     @length * LengthFactor
   end

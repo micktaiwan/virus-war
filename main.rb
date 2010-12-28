@@ -38,7 +38,6 @@ loop {
     sleep(1)
     board.start_next_level
   elsif board.virus.select{ |v| v.team == :green}.size == 0
-    game.save_score(board.current_level+1, board.get_score, :computer)
     @@player.play(:lost)
     sleep(3)
     board.load_level
